@@ -13,7 +13,7 @@ import numpy as np                              # Arrays, Mathe etc
 import matplotlib.pyplot as plt                 # Plotten
 from functools import partial                   # args Vorbelegung
 
-def IntMPRegel(f, start, ende, n):
+def IntMPRegel(f, start, ende, n:int):
     """Berechnet Integral der reellen Funktion 'f' zwischen Stellen
     'start' und 'ende' nach Mittelpunktsregel mit 'n' Segmenten.
     """
@@ -100,7 +100,7 @@ def main():
     h_wunsch = 10.0 ** np.linspace(-5.0, 0.0, 100)      # grobe Schrittweite
 
     # Array Anzahl ganzer Stuetzstellen
-    aN = np.around((b-a)/h_wunsch)
+    aN = np.around((b-a)/h_wunsch).astype(int)
     aN = np.unique(aN)
     # Array darstellbarer Abstaende ganzer Stuetzstellen
     h = (b-a)/aN
@@ -121,9 +121,9 @@ def main():
     plt.ylabel("Relativer Fehler", fontsize='large')
 
     # Arrays fuer relativen Fehler jeder Rechnung aller h
-    F_MP = np.zeros(len(h), dtype=np.float)
-    F_TR = np.zeros(len(h), dtype=np.float)
-    F_SM = np.zeros(len(h), dtype=np.float)
+    F_MP = np.zeros(len(h), dtype=float)
+    F_TR = np.zeros(len(h), dtype=float)
+    F_SM = np.zeros(len(h), dtype=float)
 
     for i, n in enumerate(aN):       # Schleife fuer Berechnung Relative Fehler
         F_MP[i] = relativ_Fehler(IntMPRegel(f, a, b, n), analytisch_wert)

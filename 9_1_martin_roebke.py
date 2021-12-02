@@ -318,7 +318,7 @@ class Aufgabe_Neun(object):
         dbin = span / self.akt_bins
         weights = np.ones(laenge) / self.nt0 / dbin
         # Das Histogramm der Orte.
-        self.ax_hist.patches = []                   # Histogramm zuruecksetzen
+        self.ax_hist.clear()                   # Histogramm zuruecksetzen
         self.ax_hist.hist(self.zustaende, int(self.akt_bins), facecolor = 'green',
                           alpha = 0.5, weights=weights)
 

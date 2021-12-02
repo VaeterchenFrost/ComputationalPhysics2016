@@ -225,7 +225,7 @@ class PeriodischesPotential(object):
         # Aktualisieren: Eintrag unten links und oben rechts - Randbedingungen.
         self.h[-1, 0] = -self.z * np.exp(1j * self.kwert)
         self.h[0, -1] = -self.z * np.exp(-1j * self.kwert)
-        self.axrechts.lines = []                    # Zuruecksetzen Zeichnung
+        self.axrechts.clear()                    # Zuruecksetzen Zeichnung
         self.axrechts.plot(self.plot_x, self.plot_V, color='k')
         for i in range(self.n_per + 1):
             self.axrechts.axvline(self.xr_s + i, c='k', ls=":")

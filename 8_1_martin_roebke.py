@@ -173,7 +173,7 @@ class Histogramm(object):
         """
         # Das Histogramm der Daten
         werte, self.bins = self.ax.hist(self.yarr, self.num_bins,
-                            normed=True, facecolor = 'green', alpha = 0.5)[:2]
+                            density=True, facecolor = 'green', alpha = 0.5)[:2]
         bin_breite = self.bins[1] - self.bins[0]
         # Titel
         self.title = "$Das\ Histogramm\ des\ Druckes\ p_A\
