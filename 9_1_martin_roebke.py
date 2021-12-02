@@ -17,12 +17,12 @@ import warnings                                     # Warnungs-Handler
 
 
 def gausskurve_v(x_punkte, ew, vari):
-        """Gibt die analytische Normalverteilung an den Punkten *x_punkte*;
-        mittels Erwartungswert *ew* und Varianz *vari*. Normiert auf 1.
-        """
-        # Normalisierungsfaktor auf Integral=Eins:
-        norm = np.sqrt(0.5 / np.pi / vari)
-        return np.exp(-0.5 * (x_punkte - ew)**2 / vari) * norm
+    """Gibt die analytische Normalverteilung an den Punkten *x_punkte*;
+    mittels Erwartungswert *ew* und Varianz *vari*. Normiert auf 1.
+    """
+    # Normalisierungsfaktor auf Integral=Eins:
+    norm = np.sqrt(0.5 / np.pi / vari)
+    return np.exp(-0.5 * (x_punkte - ew)**2 / vari) * norm
 
 
 class Aufgabe_Neun(object):
@@ -52,6 +52,7 @@ class Aufgabe_Neun(object):
         _zeitentwicklung(self): Starte ein neues Ensemble an self.x0.
         _darstellung(self, zeit): Wertet self.zustaende zu aktueller Zeit aus.
     """
+
     def __init__(self, x0, vdrift, diffusion, pos_xabs, iteilchen, tmax, axes,
                  dt=.01, binbreite=0.5, xlim=[-25, 20], seed=None, numz=250):
         """Initialisiert Parameter. Konsolenausgabe der Variablenwerte.
@@ -86,7 +87,7 @@ class Aufgabe_Neun(object):
                         ">=1 sein!").format(self.nt0)
             raise ValueError(err_text)
         self.tmax = int(tmax)
-        assert self.tmax > 0                 
+        assert self.tmax > 0
         self.set_axes(axes)                     # Zeichenbereiche.
         self.set_dt(dt)                         # dt und Rechenschritte.
         self.x_min = min(xlim)
@@ -98,14 +99,15 @@ class Aufgabe_Neun(object):
 
         print("Initialisierung mit Parametern:")
         print("x0= {}, xa= {}, vdrift= {}, diffusion= {},tmax= {}, dt= 1/{}"
-            "\n{} Realisierungen.".format(self.x0, self.xabs, self.vdrift,
-            self.diffusion, self.tmax, self.rechensteps, self.nt0))
+              "\n{} Realisierungen.".format(self.x0, self.xabs, self.vdrift,
+                                            self.diffusion, self.tmax, self.rechensteps, self.nt0))
 
         self.startnum = 0                       # Gestartete Ensembles
         self.ew_min = -1                        # Vorbelegung Zeichenparameter
         self.ew_max = 1
         self.var_max = 10
-        self.cabs = 'red'                       # Vorbereitete Farbe fuer Absor.
+        # Vorbereitete Farbe fuer Absor.
+        self.cabs = 'red'
         self.ls_t = 'b-'                        # Vorb. Linestyle der th. Kurven
         print("\nRote Werte: Messungen an Ensemble mit Absorption.")
         print("Blaue Werte: Theoretische Kurven von Ensemble ohne Absorption.")
@@ -138,9 +140,9 @@ class Aufgabe_Neun(object):
 
     def set_dt(self, dt):
         """Setze self.rechensteps und self.dt=1/self.rechensteps. """
-        self.rechensteps = int(np.ceil(1 / dt)) # Aufrunden um 0 zu vermeiden.
+        self.rechensteps = int(np.ceil(1 / dt))  # Aufrunden um 0 zu vermeiden.
         self.dt = 1 / self.rechensteps
-        
+
     def ort_iteration(self, xt):
         """Berechnung von Teilchenorten mittels Langevin-Gleichung fuer einen
         Zeitschritt von t zu t + `self.dt`.
@@ -187,7 +189,8 @@ class Aufgabe_Neun(object):
         # Text
         title = r"$Darstellung\ \ Ortsverteilung$"
         self.ax_hist.set_title(title, fontsize=18, y=1.03)
-        self.ax_norm.set_title("-> Mausklick startet Ensemble an x0 <-", y=1.03)
+        self.ax_norm.set_title(
+            "-> Mausklick startet Ensemble an x0 <-", y=1.03)
 
     def _klick(self, event):
         """Klick-Handler fuer Interaktion mit `self.axes`.
@@ -198,17 +201,19 @@ class Aufgabe_Neun(object):
         """
         # Test ob Funktionen des Plotfensters deaktiviert sind:
         mode = plt.get_current_fig_manager().toolbar.mode
-        if not (mode=='' and event.inaxes in self.axes):
+        if not (mode == '' and event.inaxes in self.axes):
             return
-        if event.button==3 and self.plot_aktiv: # Pause
+        if event.button == 3 and self.plot_aktiv:  # Pause
             self.pause = not self.pause             # Aendere Pausenstatus.
-            if not self.pause: print("Berechung fortgesetzt."); return
+            if not self.pause:
+                print("Berechung fortgesetzt.")
+                return
             print("Berechnung durch Benutzer pausiert "
                   "- Fortsetzen durch Rechtsklick.")
             while self.pause:
                 plt.pause(0.1)
             return
-        if event.button==1 and not self.pause:       # Berechnung Starten.
+        if event.button == 1 and not self.pause:       # Berechnung Starten.
             self._plot_handler()
 
     def _plot_handler(self):
@@ -250,14 +255,15 @@ class Aufgabe_Neun(object):
             # Neue Orte
             for j in range(self.rechensteps):       # Zeitschritte umsetzen
                 # Nicht-Nachholen bei Unterbrechung.
-                if startnum < self.startnum: return (2, startnum)
+                if startnum < self.startnum:
+                    return (2, startnum)
                 zustaende = self.ort_iteration(self.zustaende)
-                self.zustaende = zustaende[zustaende<self.xabs]
+                self.zustaende = zustaende[zustaende < self.xabs]
             # Ausnahme
             if len(self.zustaende) <= 1:              # Keine Statistik moeglich
                 print("Warnung: Nur {} Teilchen zu t={} uebrig!"
                       "".format(len(self.zustaende), i+1)
-                     )
+                      )
                 self.ax_hist.patches = []           # Histogramm leeren.
                 self.line_gd.set_ydata(0)
                 self.line_gda.set_ydata(0)
@@ -289,9 +295,12 @@ class Aufgabe_Neun(object):
         vari = np.var(self.zustaende, ddof=1)       # N-1, da EW experimentell.
         vari_t = 2. * self.diffusion*zeit
         # Plotbereich aktualisieren
-        if self.var_max < max(vari, vari_t): self.var_max = max(vari, vari_t)
-        if self.ew_max < max(erw, erw_t): self.ew_max = max(erw, erw_t)
-        if self.ew_min > min(erw, erw_t): self.ew_min = min(erw, erw_t)
+        if self.var_max < max(vari, vari_t):
+            self.var_max = max(vari, vari_t)
+        if self.ew_max < max(erw, erw_t):
+            self.ew_max = max(erw, erw_t)
+        if self.ew_min > min(erw, erw_t):
+            self.ew_min = min(erw, erw_t)
         self.ax_var.set_ybound(upper=self.var_max+1)
         self.ax_ew.set_ybound(lower=self.ew_min-1, upper=self.ew_max+1)
         # Verteilungsparameter und erwarteten Grenzwert zeichnen.
@@ -319,8 +328,9 @@ class Aufgabe_Neun(object):
         weights = np.ones(laenge) / self.nt0 / dbin
         # Das Histogramm der Orte.
         self.ax_hist.clear()                   # Histogramm zuruecksetzen
-        self.ax_hist.hist(self.zustaende, int(self.akt_bins), facecolor = 'green',
-                          alpha = 0.5, weights=weights)
+        self.ax_hist.hist(self.zustaende, int(self.akt_bins), facecolor='green',
+                          alpha=0.5, weights=weights)
+
 
 def main():
     """Mainfunktion fuer Numerische Diffusion mit Drift und Absorption.
@@ -350,7 +360,8 @@ def main():
     Rea()                                       # Starten der Darstellung
     Rea.show()                                  # Anzeigen der Plots
 
-#-------------Main Programm----------------
+
+# -------------Main Programm----------------
 if __name__ == "__main__":
     main()                                      # Rufe Mainroutine
 

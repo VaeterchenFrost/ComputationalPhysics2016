@@ -34,6 +34,7 @@ class SpinKonfig(object):
         flip(self, x, y): Drehe Spin an Stelle (x, y) um.
         wk_spinflip(self, x, y): Wahrscheinlichkeit fuer Spinflip an (x, y).
     """
+
     def __init__(self, n, tau=0., m0=1.):
         """Initialisiere Parameter.
         tau : Nichtnegative Zahl, Dimensionslose Temperatur.
@@ -72,7 +73,7 @@ class SpinKonfig(object):
         self.s_arr = self.erstelle_spins(m0)
         self.setze_m()                              # Aktualisiere `self.m`
         print("Aktualisiere auf tau = {:.3f}, m = {:.3f}".format(self.tau,
-                self.m))
+                                                                 self.m))
         self.setze_arwk()                           # Aktualisiere `self.arwk`
 
     def erstelle_spins(self, m0):
@@ -119,7 +120,8 @@ class SpinKonfig(object):
         o = self.s_arr[(x+1) % self.n, y]
         u = self.s_arr[(x-1) % self.n, y]
         dH = 2 * self.s_arr[x, y] * (r + l + o + u)
-        return self.arwk[self.dH==dH]             # Auf gleiche Indizes gelegt.
+        # Auf gleiche Indizes gelegt.
+        return self.arwk[self.dH == dH]
 
 
 class IsingModell(object):
@@ -134,6 +136,7 @@ class IsingModell(object):
     Privat genutzte Methoden:
         _klick(self): Verarbeitet Mausklick in self.axes.
     """
+
     def __init__(self, axspin, axpha, n, mc_steps=10, setup=True):
         """Initialisierung.
         Parameter:
@@ -159,7 +162,8 @@ class IsingModell(object):
         self.axspin.cla()
         self.axpha.cla()
         self.Spins = SpinKonfig(self.n)
-        if setup: self.plotumgebung()
+        if setup:
+            self.plotumgebung()
         print("\nSchwarze Bereiche : Spin '+1' / Weisse Bereiche : Spin '-1'."
               "\nRote Linien : Mittlere Magnetisierung im thermod. Limes."
               "\nSchwarzer Punkt rechts: Zeigt aktuelle m[tau] "
@@ -172,7 +176,7 @@ class IsingModell(object):
         """Starte Darstellung; Erster Startpunkt auf m ~ m_s, tau ~ tau_s."""
         self.Spins.neue_konfig(tau_s, m_s)          # Aufruf mit Startwert
         self.imh = self.axspin.imshow(self.Spins.s_arr, interpolation="none",
-                           cmap=plt.get_cmap('Greys'))
+                                      cmap=plt.get_cmap('Greys'))
         self.pointer.set_data(self.Spins.tau, self.Spins.m)
 
     def plotumgebung(self):
@@ -197,8 +201,9 @@ class IsingModell(object):
     def theorie_m(self, t_min, t_max, dtau=100):
         """Formel m : +,- (1 - 1/np.sinh(2/tau)**4)**0.125
         """
-##############TEXT
-        if t_max < 0: return [], []                 # Negative Temperatur
+# TEXT
+        if t_max < 0:
+            return [], []                 # Negative Temperatur
         assert t_min < t_max                        # Ordnung korrekt
         grenztau = 2. / np.arcsinh(1)               # Grenztemperatur
         t_min = max(0., t_min)                      # t_min>=0
@@ -208,7 +213,7 @@ class IsingModell(object):
             taux_ar += [np.linspace(t_min, min(t_max, 2.2), dtau)]
         if t_min < grenztau and t_max > 2.2:         # steiler Bereich
             taux_ar += [np.linspace(max(2.2, t_min), min(t_max, grenztau), dtau,
-                                   endpoint=False)]
+                                    endpoint=False)]
         if t_max >= grenztau:                        # Waagerecht
             taux_ar += [grenztau, t_max]
         tau = np.hstack(taux_ar)
@@ -224,10 +229,10 @@ class IsingModell(object):
         """Verwaltet Mausklick.
         Bei Linksklick in einen der Achsenbereiche:
         """
-##############TEXT
+# TEXT
         # Test ob Funktionen des Plotfensters deaktiviert sind:
         mode = plt.get_current_fig_manager().toolbar.mode
-        if not (mode=='' and event.button==1):
+        if not (mode == '' and event.button == 1):
             return
         if event.inaxes == self.axspin:             # Iterationen
             self.plot_aktiv = True
@@ -238,7 +243,8 @@ class IsingModell(object):
                 plt.pause(0.10)
             self.plot_aktiv = False
         elif event.inaxes == self.axpha:
-            if self.plot_aktiv: return              # Noch in Zeichnung&Rechnung
+            if self.plot_aktiv:
+                return              # Noch in Zeichnung&Rechnung
             # Neue Startposition
             t, m = event.xdata, event.ydata
             tau_s = max(t, 0.)                      # tau Nicht negativ
@@ -257,8 +263,10 @@ class IsingModell(object):
             # Zwei Zufallszahlen Pos.
             x, y = np.random.randint(self.n, size=2)
             wk = self.Spins.wk_spinflip(x, y)       # Wahrscheinlichkeit flip
-            if wk==1: self.Spins.flip(x, y)         # 1: Direkt Spin drehen.
-            elif np.random.rand()<=wk: self.Spins.flip(x, y)
+            if wk == 1:
+                self.Spins.flip(x, y)         # 1: Direkt Spin drehen.
+            elif np.random.rand() <= wk:
+                self.Spins.flip(x, y)
         # Neue Spin-Konfiguration erstellt.
         self.Spins.setze_m()
 
@@ -273,7 +281,7 @@ def main():
     """
     # Unterdruecke mplDeprecation waehrend Durchlauf. Dies hat lediglich
     # Einfluss auf die Konsolenausgabe des Programms.
-    filterwarnings("ignore",category=cbook.mplDeprecation)
+    filterwarnings("ignore", category=cbook.mplDeprecation)
 
     # Anfangstext Konsole
     print(__doc__)
@@ -293,7 +301,8 @@ def main():
     Modell(t0, m0)
     Modell.show()
 
-#-------------Main Programm----------------
+
+# -------------Main Programm----------------
 if __name__ == "__main__":
     main()                                          # Rufe Mainroutine
 

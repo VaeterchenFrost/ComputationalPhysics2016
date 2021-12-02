@@ -14,11 +14,12 @@ jeweils neueste Paket berechnet und verfolgt.
 Alle vorherigen Wellenpakete werden verworfen.
 """
 
-from __future__ import division, print_function # problemlose Ganzzahl-Division
+from __future__ import division, print_function  # problemlose Ganzzahl-Division
 import numpy as np                              # Arrays, Mathe etc
 import matplotlib.pyplot as plt                 # Plotten
 import quantenmechanik as qm                    # Eigenwerte und -funktionen 1D
 from functools import partial                   # Voreinstellung *args **kwargs
+
 
 def doppelmulde(x=None, A=0.05, string=False):
     """doppelmulde(x=None, A=0.05, string=False)
@@ -32,10 +33,14 @@ def doppelmulde(x=None, A=0.05, string=False):
         Wenn True wird eine Funktionsbeschreibung als String zurueckgegeben.
     """
     if string:
-        if A==0: return r"$x^4-x^2$"
-        if A>0: return r"$x^4-x^2-{}*x$".format(A)
-        if A<0: return r"$x^4-x^2+{}*x$".format(-A)
+        if A == 0:
+            return r"$x^4-x^2$"
+        if A > 0:
+            return r"$x^4-x^2-{}*x$".format(A)
+        if A < 0:
+            return r"$x^4-x^2+{}*x$".format(-A)
     return x**4 - x*x - A*x
+
 
 def gaussian_wave_paket(xa, sigma=1., x0=0., heff=1., p0=0.):
     """gaussian_wave_paket(xa, sigma=1., x0=0., heff=1., p0=0.)
@@ -51,7 +56,7 @@ def gaussian_wave_paket(xa, sigma=1., x0=0., heff=1., p0=0.):
     x = np.array(xa, dtype=complex)
     fak = (2*np.pi*sigma*sigma)**-0.25              # Vorfaktor
     arg = -((x - x0)/(2*sigma))**2                  # Erstes Argument von exp
-    if p0==0.:                                      # p0 gleich 0.
+    if p0 == 0.:                                      # p0 gleich 0.
         phi = fak*np.exp(arg)
     else:                                           # Wenn p0!=0.
         phi = fak*np.exp(arg)*np.exp(1j/heff*p0*x)
@@ -65,6 +70,7 @@ class QMZeitentwicklung(object):
     Wellenpaket in der Basis der Eigenfunktionen dargestellt, und fuer
     gewaehlte Zeiten per Zeitoperator entwickelt.
     """
+
     def __init__(self, axis, potential, emax, p0, heff, sigma, xr_s, xr_e, nr,
                  tmin=0, tmax=10, num_t=200, title=None, fak=.01,
                  phi_color='k', update_ef=True, wait_dt=0.01):
@@ -91,7 +97,7 @@ class QMZeitentwicklung(object):
            wait_dt:    Zahl >=0; Plot-Pause zwischen Zeitschritten.
         """
         print("QMZeitentwicklung Initialisierung mit \np0 = {}, heff = {}, "
-        "sigma = {}, N = {}.".format(p0, heff, sigma, nr))
+              "sigma = {}, N = {}.".format(p0, heff, sigma, nr))
         self.axis = axis
         self.potential = potential
         self.emax = emax
@@ -102,7 +108,7 @@ class QMZeitentwicklung(object):
         self.xr_e = xr_e
         self.nr = nr
         self.t = np.linspace(tmin, tmax, num_t)
-        assert len(self.t)>0
+        assert len(self.t) > 0
         self.title = title
         self.fak = fak
         self.phi_color = phi_color
@@ -122,7 +128,7 @@ class QMZeitentwicklung(object):
         self.pot_x = self.potential(self.x)
         self.ew, self.ef = qm.diagonalisierung(self.heff, self.x, self.pot_x)
         self.berechnet = True
-        
+
     def plot(self):
         """Initialisieren und Beschriften des Plotbereiches entsprechend der
         Methode `qm.plot_eigenfunktionen` und der Betragsquadrate def EF.
@@ -131,7 +137,8 @@ class QMZeitentwicklung(object):
          `self.zeitentw`: Vorbereitung der Linie fuer die Wellenpaket-Darst.
         Verbindet 'button_press_event' mit `self.mausklick`.
         """
-        if self.berechnet is False: self.berechnung_esys()
+        if self.berechnet is False:
+            self.berechnung_esys()
         # Plottet: Potential - Eigenwerte Basislinie, Eigenfunktionen
         qm.plot_eigenfunktionen(self.axis, self.ew, self.ef, self.x, self.pot_x,
                                 Emax=self.emax, fak=self.fak,
@@ -164,7 +171,7 @@ class QMZeitentwicklung(object):
         mode = plt.get_current_fig_manager().toolbar.mode
         # Test ob Klick mit linker Maustaste und im Koordinatensystem
         # erfolgt ist, sowie ob Funktionen des Plotfensters deaktiviert sind:
-        if not (event.button==1 and event.inaxes==self.axis and mode==''):
+        if not (event.button == 1 and event.inaxes == self.axis and mode == ''):
             return
         x0 = event.xdata
         self.phi = gaussian_wave_paket(self.x, self.sigma, x0,
@@ -189,15 +196,16 @@ class QMZeitentwicklung(object):
         print("Paket [{}]: Start an x0 = {:.3f}".format(startnum, x0))
         print("    Differenz in Rekonstruktion: {:.3e}".format(normdiff))
         print("    Zeit-Darstellung von t={} bis {} in {} Schritten."
-        "".format(self.t[0], self.t[-1], len(self.t)))
+              "".format(self.t[0], self.t[-1], len(self.t)))
 
         self.zeitentw.set_xdata(self.x)
         for t in self.t:                            # Zeitschritte darstellen.
             # Nicht-Nachholen bei Unterbrechung.
-            if startnum<self.startnum: return
+            if startnum < self.startnum:
+                return
             # Zeitentwicklung auf Phi-Koeffizienten:
             self.phi_rec = np.dot(self.ef,
-                                  self.c *np.exp(-1j * self.ew * t / self.heff))
+                                  self.c * np.exp(-1j * self.ew * t / self.heff))
             self.plot_phi = self.fak*np.abs(self.phi_rec)**2 + self.phi_ew
             self.zeitentw.set_ydata(self.plot_phi)
             plt.pause(self.wait_dt)
@@ -206,6 +214,7 @@ class QMZeitentwicklung(object):
     def show(self):
         """Zeige alle erstellten Figuren. Warte auf Benutzerinteraktion."""
         plt.show()
+
 
 def main():
     """Mainfunktion Quantenmechanik von 1D-Potentialen II - Zeitentwicklung.
@@ -241,11 +250,12 @@ def main():
 
     # Instanziierung
     rea = QMZeitentwicklung(axis, potential, emax, p0, heff, sigma, xr_s, xr_e,
-                N, tmin, tmax, num_t, title, fak=fak, update_ef=update_ef)
+                            N, tmin, tmax, num_t, title, fak=fak, update_ef=update_ef)
     rea.plot()                                      # Starte Darstellung
     rea.show()                                      # Benutzerinteraktion
 
-#-------------Main Programm----------------
+
+# -------------Main Programm----------------
 if __name__ == "__main__":
     main()                                          # Rufe Mainroutine
 

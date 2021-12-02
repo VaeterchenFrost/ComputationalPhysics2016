@@ -11,12 +11,13 @@ Potential in Schwarz und Betragsquadrat der Eigenfunktion auf Hoehe jeweiliger
 Eigenenergie gezeichnet.
 """
 
-from __future__ import division, print_function # problemlose Division
+from __future__ import division, print_function  # problemlose Division
 import numpy as np                              # Arrays, Mathe etc
 import matplotlib.pyplot as plt                 # Plotten
 import matplotlib as mpl                        # Grundeinstellungen
 from scipy.linalg import eigh                   # Matrix Eigenwerte
 from functools import partial                   # Voreinstellung *args **kwargs
+
 
 def per_pot(x, a=1.0):
     """Genutzte eindimensionale Potential-Funktion 'V(x)'
@@ -51,6 +52,7 @@ class PeriodischesPotential(object):
         _linien_ewvonk(self): Helferfunktion fuer _zeichnen(self).
         _mausklick(self) Verarbeitet Mausklick. Passt Plot an neue RandBdg. an.
     """
+
     def __init__(self, potential, xr_s, xr_e, emax, nr,
                  krange=100, n_per=1, heff=1, colors=None):
         """Initialisierung der genutzten Parameter.
@@ -67,9 +69,11 @@ class PeriodischesPotential(object):
         self.potential = potential                  # Genutzte Potentialfunktion
         self.heff = heff                            # effektives h-quer
         assert self.heff > 0
-        self.xr_s = float(xr_s)                     # Start Rechenbereich in Ort
+        # Start Rechenbereich in Ort
+        self.xr_s = float(xr_s)
         self.xr_e = float(xr_e)                     # Ende Rechenbereich in Ort
-        assert self.xr_e - self.xr_s == 1.          # Periodenlaenge in Alg.= 1.
+        assert self.xr_e - \
+            self.xr_s == 1.          # Periodenlaenge in Alg.= 1.
 
         self.emax = emax                            # Maximale E.-Auswertung
         self.krange = int(krange)                   # `k` in Schritten aendern
@@ -77,11 +81,14 @@ class PeriodischesPotential(object):
         self.n_per = int(n_per)                     # Anzahl Perioden Zeichnen
         self.nr = int(nr)                           # x-Stuetzstellen
         assert self.nr > 0
-        if colors is None: self.colors = ['b', 'g', 'r', 'c', 'm', 'y']
-        else: self.colors = colors                  # feste Farbreihenfolge
+        if colors is None:
+            self.colors = ['b', 'g', 'r', 'c', 'm', 'y']
+        else:
+            self.colors = colors                  # feste Farbreihenfolge
         self.ef_skal = 0.1                          # Sichtbarkeit der Amplitude
         self.eigenw = ()                            # Tupel, immutable
-        self.anzahl_ew = 0                          # Max. beobachtete Linien(k)
+        # Max. beobachtete Linien(k)
+        self.anzahl_ew = 0
 
         self.plotlinks = []                         # Array k(E)
         self.k = []                                 # Array der k-Werte
@@ -101,9 +108,9 @@ class PeriodischesPotential(object):
     def kcheck_zeichnen(self):
         """Kurze Pruefung der bereitgestellten Parameter."""
         s = ()
-        if len(self.V)==0:
+        if len(self.V) == 0:
             s += "Potential self.V ist leer.",
-        if len(self.x)==0:
+        if len(self.x) == 0:
             s += "Ortsarray self.x ist leer.",
         try:
             assert self.h.shape == (self.nr, self.nr)
@@ -148,7 +155,8 @@ class PeriodischesPotential(object):
             self.eigenw += (cut, )
 
             # Aktualisieren Max Anzahl an n
-            if len(cut) > self.anzahl_ew: self.anzahl_ew = len(cut)
+            if len(cut) > self.anzahl_ew:
+                self.anzahl_ew = len(cut)
         print("Anzahl genutzter Eigenenergien =", self.anzahl_ew)
 
     def _zeichnen(self):
@@ -162,7 +170,7 @@ class PeriodischesPotential(object):
         self._linien_ewvonk()
         # Erstelle eine Figur inklusive Subplots.
         self.fig, (self.axlinks, self.axrechts) = plt.subplots(
-                                                   1, 2, figsize=(16,10))
+            1, 2, figsize=(16, 10))
         self.fig.subplots_adjust(left=0.07, bottom=0.08, right=0.94,
                                  top=0.94, wspace=0.15)
         # Achse Variation k
@@ -177,12 +185,12 @@ class PeriodischesPotential(object):
                             min(self.V), self.emax*1.1])
         self.axrechts.set_xlabel("x")
         self.axrechts.set_ylabel(r'$V(x)\ \rm{,\ \|Efkt.\|^{2}\ bei\ EW}$')
-         #-------------------------------------------
-        print(len(self.k), len(self.plotlinks[:,1]))
+        # -------------------------------------------
+        print(len(self.k), len(self.plotlinks[:, 1]))
         for i in range(self.anzahl_ew):
             # [0]->k, [1]->E_i(k)
-            self.axlinks.plot(self.k, self.plotlinks[:,i], 'o', ms=3,
-            color=self.colors[i % len(self.colors)])
+            self.axlinks.plot(self.k, self.plotlinks[:, i], 'o', ms=3,
+                              color=self.colors[i % len(self.colors)])
         # Potential Plot
         self.plot_x = np.concatenate([self.x + i for i in range(self.n_per)])
         self.plot_V = np.tile(self.V, self.n_per)
@@ -203,7 +211,7 @@ class PeriodischesPotential(object):
                     # Versuche alle Energien im Bereich zu finden:
                     self.plotlinks[i, j] = self.eigenw[i][j]
                 except IndexError:              # Wenn En an diesem k => Emax
-                    self.plotlinks[i, j] = None # Punkt nicht zeichnen
+                    self.plotlinks[i, j] = None  # Punkt nicht zeichnen
 
     def _mausklick(self, event):
         """Linker Mausklick in linke Achse waehlt kontinuierlich ein
@@ -215,7 +223,7 @@ class PeriodischesPotential(object):
         mode = plt.get_current_fig_manager().toolbar.mode
         # Test ob Klick mit linker Maustaste und im Koordinatensystem
         # erfolgt ist, sowie ob Funktionen des Plotfensters deaktiviert sind:
-        if not (event.button==1 and event.inaxes==self.axlinks and mode==''):
+        if not (event.button == 1 and event.inaxes == self.axlinks and mode == ''):
             return
         # Uebernehmen der Mausposition
         kklick = event.xdata
@@ -232,8 +240,8 @@ class PeriodischesPotential(object):
 
         ew, ef = eigh(self.h)                       # Diagonalisierung: ew, ef
         cut = np.where(ew < self.emax)[0]          # Weiter genutzte Indizes
-        for i, val in enumerate(ew[cut]): # Auswahl der genutzten Funktionen
-            ef_darstellung = np.array(abs(ef[:,i])**2)      # EF ||^2
+        for i, val in enumerate(ew[cut]):  # Auswahl der genutzten Funktionen
+            ef_darstellung = np.array(abs(ef[:, i])**2)      # EF ||^2
             ef_darstellung /= self.delta_x              # Integral Normierung
             ef_darstellung = ef_darstellung*self.ef_skal + val   # Skalierung
             plotef = np.tile(ef_darstellung, self.n_per)
@@ -245,7 +253,8 @@ class PeriodischesPotential(object):
                                   color=self.colors[i % len(self.colors)])
         self.axrechts.set_title("k " + r"$\approx\ {{{:+.3f}}}\ \pi$"
                                 "".format(self.kwert/np.pi))
-        if self.k_line is None:         # Vertikale Linie Klickposition in E(k).
+        # Vertikale Linie Klickposition in E(k).
+        if self.k_line is None:
             self.k_line = self.axlinks.axvline(self.kwert, color="black")
         else:                           # Veraendere vertikale k_line.
             self.k_line.set_xdata(self.kwert)
@@ -255,6 +264,7 @@ class PeriodischesPotential(object):
         """Zeige alle erstellten Figuren. Warte auf Benutzerinteraktion."""
         print("Warte auf Maus-Interaktion.")
         plt.show()
+
 
 def main():
     """Mainfunktion Quantenmechanik III - Periodische Potentiale.
@@ -279,7 +289,8 @@ def main():
     rea.start()                                 # Starte Berechnung und Plot
     rea.show()                                  # Benutzerinteraktion
 
-#-------------Main Programm---------------
+
+# -------------Main Programm---------------
 if __name__ == "__main__":
     main()
 

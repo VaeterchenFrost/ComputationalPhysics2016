@@ -19,6 +19,7 @@ def relativ_Fehler(wert, erwartet):
     """Relativer Fehler von 'wert' bezueglich einer Referenz 'erwartet'."""
     return abs((wert - erwartet) / erwartet)
 
+
 def func(x=0, abl=0, string=False):
     """Reelle Funktion mit Argument x, Grundlage zu Berechnung.
     abl:
@@ -38,23 +39,26 @@ def func(x=0, abl=0, string=False):
 
     raise ValueError("'func' konnte Parameter nicht erkennen.")
 
+
 def vorwaertsDiff(f, x, h):
     """return Ableitung der Funktion f an Stelle x
     nach Vorwaertsdifferenz mit Parameter h
     """
-    return 1.0/h *(f(x+h) - f(x))
+    return 1.0/h * (f(x+h) - f(x))
+
 
 def zentralDiff(f, x, h):
     """return Ableitung der Funktion f an Stelle x
     nach Zentraldifferenz mit Parameter h
     """
-    return 1.0/h *(f(x+h/2) - f(x-h/2))
+    return 1.0/h * (f(x+h/2) - f(x-h/2))
+
 
 def extrapolDiff(f, x, h):
     """return Ableitung der Funktion f an Stelle x
     nach '1/3h *( 8*(f(x + h/4)-f(x - h/4)) - (f(x + h/2) - f(x - h/2)))'
     """
-    return 1/(3*h) *(8*(f(x+h/4) - f(x-h/4)) - (f(x+h/2) - f(x-h/2)))
+    return 1/(3*h) * (8*(f(x+h/4) - f(x-h/4)) - (f(x+h/2) - f(x-h/2)))
 
 
 def main():
@@ -85,7 +89,7 @@ def main():
     relFehlerZD = relativ_Fehler(ZentralDiff, ableitung_wert)
     relFehlerED = relativ_Fehler(ExtrapolDiff, ableitung_wert)
 
-    fig = plt.figure(figsize=(12,10))               # Figure
+    fig = plt.figure(figsize=(12, 10))               # Figure
     fig.subplots_adjust(0.08, 0.07, 0.95, 0.91)     # Begrenzung [l,b,r,t]
 
     # Erstelle Subplot Zeichenfenster
@@ -120,7 +124,8 @@ def main():
 
     plt.show()                                      # Zeigen des Fensters
 
-#-------------Main Programm---------------
+
+# -------------Main Programm---------------
 if __name__ == "__main__":
     main()                                          # Rufe Mainroutine
 

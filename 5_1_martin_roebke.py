@@ -14,13 +14,14 @@
     jeweils mit -1 multipliziert sein.
 """
 
-from __future__ import division, print_function # problemlose Ganzzahl-Division
+from __future__ import division, print_function  # problemlose Ganzzahl-Division
 import numpy as np                              # Arrays, Mathe etc
 import matplotlib.pyplot as plt                 # Plotten
 import matplotlib as mpl
 from scipy.linalg import eigh                   # Geordnete Eigenwerte
 
-def doppelmulde(x=None, A=0.05, string=False):
+
+def doppelmulde(x=None, A=0.15, string=False):
     """doppelmulde(x=None, A=0.05, string=False)
     Rueckgabe : x**4 - x*x - A*x
     Parameter:
@@ -35,6 +36,7 @@ def doppelmulde(x=None, A=0.05, string=False):
         return r"$x^4-x^2-{}*x$".format(A)
     return x**4-x*x-A*x
 
+
 def doppelmulde_sym(x=None, string=False):
     """doppelmulde_sym(x=None, string=False)
     Rueckgabe : x**4-x*x
@@ -48,6 +50,7 @@ def doppelmulde_sym(x=None, string=False):
         return r"$x^4-x^2$"
     return x**4-x*x
 
+
 def parabel(x=None, a=0.5, b=0, c=0, string=False):
     """parabel(x=None, a=0.5, b=0, c=0, string=False)
     Rueckgabe : a*x*x + b*x + c
@@ -60,13 +63,18 @@ def parabel(x=None, a=0.5, b=0, c=0, string=False):
         Wenn True wird eine Funktionsbeschreibung als String zurueckgegeben.
     """
     if string:
-        s=""
-        if a: s += "{}*x^2".format(a)
-        if b: s += "{:+}*x".format(b)
-        if c: s += "{:+}".format(c)
-        if s=="": s = "0"
+        s = ""
+        if a:
+            s += "{}*x^2".format(a)
+        if b:
+            s += "{:+}*x".format(b)
+        if c:
+            s += "{:+}".format(c)
+        if s == "":
+            s = "0"
         return "$"+s+"$"
     return a*x*x + b*x + c
+
 
 def schiefemulde(x=None, A=1.1, string=False):
     """schiefemulde(x=None, A=1.1, string=False)
@@ -82,6 +90,7 @@ def schiefemulde(x=None, A=1.1, string=False):
     if string:
         return r"$x^4-x^2{:+}*x$".format(A)
     return x**4-x*x+A*x
+
 
 def wellental(x=None, a=0.4, b=0.2, c=1.6, d=0.0, string=False):
     """wellental(x=None, a=0.4, b=0.2, c=1.6, d=0.0, string=False)
@@ -115,7 +124,7 @@ def matrix_rechnen(potential, stuetz, heff, overwrite_a=False):
     overwrite_a : boolean
         Moeglich, die Matrix von der Diagonalisierungsroutine
         ueberschreiben zu lassen. Default:False.
-        
+
     Normierung: Integral Betragsquadrat in betrachtetem Intervall ergibt 1.
     Rueckgabe: ev, ew
     """
@@ -131,6 +140,7 @@ def matrix_rechnen(potential, stuetz, heff, overwrite_a=False):
     # Vornormierung ist: np.sum(np.abs(ev[:, i])**2) == 1.
     # Als Integral normiert: Int(np.abs(ev[:, i])**2 * dx) == 1.
     return ev / np.sqrt(step), ew
+
 
 def ef_zeichnen(ax, x_r, ev, ew, skal=1., auto_skal=True, ew_text=False,
                 y_alt=False, x_txt=0.03, y_txt=0.007,
@@ -169,17 +179,19 @@ def ef_zeichnen(ax, x_r, ev, ew, skal=1., auto_skal=True, ew_text=False,
         Maximale Anzahl an Eigenfunktionen in der Legende.
     """
     N = len(ew)                                     # N: Laenge gegebener ew.
-    if N == 0: print("len(ew)==0. ew={}".format(ew)); return
-    
-    if auto_skal==True:  # Skalierung Funktionswerte
+    if N == 0:
+        print("len(ew)==0. ew={}".format(ew))
+        return
+
+    if auto_skal == True:  # Skalierung Funktionswerte
         if N >= 2:   # Mittlerer Abstand der EW als Referenz
             h_max = (ew[-1] - ew[0]) / (2.*N)
-            skal = h_max / max(abs(ev[:,0]))
+            skal = h_max / max(abs(ev[:, 0]))
         print("Skalierung Eigenfunktionen in 'ef_zeichnen' :", skal)
-        
+
     x_interval = [x_r[0], x_r[-1]]                  # Zeichenbereich Eigenwerte
     for i, E in enumerate(ew):                      # Zeichnung EF und EW
-        poty = ev[:,i] * skal
+        poty = ev[:, i] * skal
         ax.plot(x_r, poty + E, lw=2, label="$\Psi_{{{}}}\ (x)$".format(i))
         # Energie als waagerechte Linie
         ax.hlines(E, x_r[0], x_r[-1], color='0.4', lw=1.5)
@@ -188,7 +200,8 @@ def ef_zeichnen(ax, x_r, ev, ew, skal=1., auto_skal=True, ew_text=False,
         ylim = ax.get_ylim()
         text_x = xlim[0] + (xlim[1] - xlim[0]) * x_txt
         if y_alt:
-            a = np.empty((N,), int)                 # Alternierende Textposition
+            # Alternierende Textposition
+            a = np.empty((N,), int)
             a[::2] = -4
             a[1::2] = 1
             y_txt = a*y_txt
@@ -205,7 +218,7 @@ def ef_zeichnen(ax, x_r, ev, ew, skal=1., auto_skal=True, ew_text=False,
                   fontsize='x-large')
 
 
-def main(aufgabe='a'):
+def main(aufgabe='e'):
     """Mainfunktion Quantenmechanik von 1D Potentialen.
     Eingabe der Parameter fuer Berechnung und Zeichnung.
     Durchfuehrung und Benutzerfuehrung zu Aufgabenstellung 5.1.
@@ -218,29 +231,29 @@ def main(aufgabe='a'):
     # Ausgabe erster n_ew_p Eigenwerte in Konsole. Setze 0 um zu ueberspringen.
     ew_print = 10
     mpl.rcParams.update({'font.size': 14})
-    if aufgabe=='a':
+    if aufgabe == 'a':
         potential = doppelmulde
         heff = 0.07
         e_max = 0.15
-        x_halb = 2.0                      # Rechenintervall -x_halb bis +x_halb 
+        x_halb = 2.0                      # Rechenintervall -x_halb bis +x_halb
         nr = 500                                    # Stuetzstellen Rechnen
         axw = [-1.9, 1.7, -0.32, 0.2]               # Zeichenbereich
-    elif aufgabe=='b':
+    elif aufgabe == 'b':
         potential = doppelmulde_sym
         heff = 0.07
         e_max = 0.65
-        x_halb  = 1.8                     # Rechenintervall -x_halb bis +x_halb 
+        x_halb = 1.8                     # Rechenintervall -x_halb bis +x_halb
         nr = 500                                    # Stuetzstellen Rechnen
         axw = [-2, 2, -0.3, 0.8]                    # Zeichenbereich
         y_alt = True
-    elif aufgabe=='c':
+    elif aufgabe == 'c':
         potential = parabel
         heff = 1
         e_max = 10
-        x_halb  = 6                       # Rechenintervall -x_halb bis +x_halb 
+        x_halb = 6                       # Rechenintervall -x_halb bis +x_halb
         nr = 800                                    # Stuetzstellen Rechnen
         axw = [-6, 6, 0, 11]                        # Zeichenbereich
-    elif aufgabe=='d':
+    elif aufgabe == 'd':
         potential = schiefemulde
         heff = 0.07
         e_max = 0.6
@@ -248,11 +261,11 @@ def main(aufgabe='a'):
         xr_e = +1.1
         nr = 650                                    # Stuetzstellen Rechnen
         axw = [-2.1, 1.0, -1.22, .82]               # Zeichenbereich
-    elif aufgabe=='e':
+    elif aufgabe == 'e':
         potential = wellental
         heff = 0.17
         e_max = 1.0
-        x_halb = 3.8                      # Rechenintervall -x_halb bis +x_halb 
+        x_halb = 3.8                      # Rechenintervall -x_halb bis +x_halb
         nr = 600                                    # Stuetzstellen Rechnen
         axw = [-4, 6, 0, 1.15]                      # Zeichenbereich
         ew_text = False                             # Eigenwerte beschriften
@@ -261,27 +274,28 @@ def main(aufgabe='a'):
         raise ValueError("Unbekannte Aufgabe: " + aufgabe)
 
     nx = 300                                        # Potential-Plot
-    if x_halb is not None: xr_s, xr_e = -x_halb , x_halb 
+    if x_halb is not None:
+        xr_s, xr_e = -x_halb, x_halb
 
     # Anfangstext Konsole
     print(__doc__)
     print("Berechnungsparameter:\n   h_eff={}, E<{},\n"
-    "   Rechenintervall: [{}, {}]\n"
-    "   mit N={} Stuetzstellen, dx={}."
-    "".format(heff, e_max, xr_s, xr_e, nr, (xr_e-xr_s)/nr)
-    )
+          "   Rechenintervall: [{}, {}]\n"
+          "   mit N={} Stuetzstellen, dx={}."
+          "".format(heff, e_max, xr_s, xr_e, nr, (xr_e-xr_s)/nr)
+          )
     # Punkte fuer Zeichen
     drawx = np.linspace(axw[0], axw[1], nx)
     # Punkte fuer Rechnen
     step = (xr_e - xr_s) / (nr + 1)                     # Ortsgitterabstand
     x_r = np.linspace(xr_s + step, xr_e - step, nr)     # Ortsgitterpunkte
     # Erstellung fig
-    fig, axes = plt.subplots(figsize=(14,10))
+    fig, axes = plt.subplots(figsize=(14, 10))
     axes.set_title("$Potential:\quad$" + potential(string=True), fontsize=24)
     axes.axis(axw)
     # Berechnung Matrix
     ev, ew = matrix_rechnen(potential, x_r, heff, overwrite_a=True)
-    ew_cut = ew[ew<e_max]                           # Selektion kleiner EW
+    ew_cut = ew[ew < e_max]                           # Selektion kleiner EW
     print("Anzahl genutzter Eigenenergien: {}".format(len(ew_cut)))
     # Darstellung der Ergebnisse auf 'axes'.
     ef_zeichnen(axes, x_r, ev, ew_cut, ew_text=ew_text, y_alt=y_alt, leg=leg)
@@ -294,7 +308,8 @@ def main(aufgabe='a'):
             print("   n={}".format(i), e)
     plt.show()                                      # Darstellung + Interaktion
 
-#-------------Main Programm----------------
+
+# -------------Main Programm----------------
 if __name__ == "__main__":
     main()                                          # Rufe Mainroutine
 

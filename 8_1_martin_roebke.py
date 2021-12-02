@@ -21,10 +21,11 @@ class Histogramm(object)
     Stellt Methoden zeichnen, zeichnen_gauss.
 """
 
-from __future__ import division, print_function # problemlose Division
+from __future__ import division, print_function  # problemlose Division
 import numpy as np                              # Arrays, Mathe etc
 import matplotlib.pyplot as plt                 # Plotten
 from functools import partial                   # Vorbelegung args.
+
 
 def gausskurve(x, ew, stdabw):
     """Gibt die analytische Normalverteilung an den Punkten *x*;
@@ -47,6 +48,7 @@ class IdealesGasEnsemble(object):
     Laesst weitere statistische Parameter berechnen und das Ergebnis
     in Histogramm darstellen.
     """
+
     def __init__(self, N, R, zeitintervall, berechne_zustaende=False):
         """Speichert die Parameter Anzahl Teilchen int(N), Anzahl
         Realisierungen int(R) und betrachtetes Zeitintervall dt.
@@ -68,7 +70,8 @@ class IdealesGasEnsemble(object):
 
         print("N = {}; R = {}; dt = {}".format(self.N, self.R, self.dt))
         # Alle Zustaende erstellen
-        if berechne_zustaende: self.zustaende_erstellen()
+        if berechne_zustaende:
+            self.zustaende_erstellen()
 
     def zustaende_erstellen(self):
         """Speichert statistisch berechnete Druecke in Array 'druck' Laenge R.
@@ -77,7 +80,8 @@ class IdealesGasEnsemble(object):
         self.druck = np.zeros(self.R)
         rea = Realisierung(self.N, self.dt)         # Realisierung erstellen
         for i in range(self.R):
-            if i: rea.set_start()                   # Neue Startwerte
+            if i:
+                rea.set_start()                   # Neue Startwerte
             # Druck berechnen
             rea.berechne_druck()
             # Den Druck pA abspeichern
@@ -88,6 +92,7 @@ class Realisierung(object):
     """Berechnet aus Teilchenzahl N und Zeitintervall dt
     Stoesse mit rechter Wand 'n' und den dazugehoerigen Druck.
     """
+
     def __init__(self, N, dt):
         """Parameter: Anzahl Teilchen N, Zeitintervall dt.
         Erstellt statistisch verteilte self.x0, self.v0.
@@ -155,6 +160,7 @@ class Histogramm(object):
         Zu kleine Werte fuehren ggf. zu grossem Informationsverlust.
         Default : 70
     """
+
     def __init__(self, axis, daten, num_bins=70):
         """Erstellt Figure mit self.figsize, und einem Subplot.
         daten : array_like, Darzustellende Daten.
@@ -173,7 +179,7 @@ class Histogramm(object):
         """
         # Das Histogramm der Daten
         werte, self.bins = self.ax.hist(self.yarr, self.num_bins,
-                            density=True, facecolor = 'green', alpha = 0.5)[:2]
+                                        density=True, facecolor='green', alpha=0.5)[:2]
         bin_breite = self.bins[1] - self.bins[0]
         # Titel
         self.title = "$Das\ Histogramm\ des\ Druckes\ p_A\
@@ -204,13 +210,13 @@ def main():
     Eingabe der Parameter und Starten gewuenschter Realisierungen.
     """
     benutzerfuehrung = ("Computational Physics Aufgabe 8.1,  "
-    "Autor: Martin Roebke 19.06.16\n"
-    "Bestimmung des mittleren Druckes in Zeitintervall dt, \n"
-    "der auf Seitenflaeche A eines Quaders von N Teilchen ausgeuebt wird.\n"
-    "Darstellung von Ensemble mit R Realisierungen als normiertes Histogramm.\n"
-    "Erwartungswert und Standardabweichung des Ensembles werden berechnet,\n"
-    "in Konsole ausgegeben. In das Histogramm wird die korrespondierende \n"
-    "Gausskurve gezeichnet." "\n")
+                        "Autor: Martin Roebke 19.06.16\n"
+                        "Bestimmung des mittleren Druckes in Zeitintervall dt, \n"
+                        "der auf Seitenflaeche A eines Quaders von N Teilchen ausgeuebt wird.\n"
+                        "Darstellung von Ensemble mit R Realisierungen als normiertes Histogramm.\n"
+                        "Erwartungswert und Standardabweichung des Ensembles werden berechnet,\n"
+                        "in Konsole ausgegeben. In das Histogramm wird die korrespondierende \n"
+                        "Gausskurve gezeichnet." "\n")
 
     print(benutzerfuehrung)
 
@@ -238,13 +244,14 @@ def main():
     histogramm.zeichnen()
     histogramm.zeichnen_gauss(gauss)
     # Konsolenausgabe der verwendeten Plot-Parameter
-    print("Erwartungswert = " , erwartungswert)
-    print("Standardabweichung = " , std_abweichung)
+    print("Erwartungswert = ", erwartungswert)
+    print("Standardabweichung = ", std_abweichung)
     print("Anzahl Bins: ", histogramm.num_bins)
 
     histogramm.show()                               # Benutzerinteraktion
 
-#-------------Main Programm----------------
+
+# -------------Main Programm----------------
 if __name__ == "__main__":
     main()                                          # Rufe Mainroutine
 

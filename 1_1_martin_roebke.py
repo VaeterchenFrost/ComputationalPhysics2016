@@ -23,23 +23,25 @@ def sli_freeze(sli):
     """Slider `sli` reagiert danach nicht mehr auf einkommende Events."""
     sli.active = False
 
+
 def sli_release(sli, mouse_release=True):
     """Slider `sli` reagiert wieder auf einkommende Events.
     mouse_release : bool, True
         Gibt Mauszeiger von Slider frei.
     """
-    if mouse_release: # Selbst freigeben nach inaktiv
+    if mouse_release:  # Selbst freigeben nach inaktiv
         sli.canvas.release_mouse(sli.ax)
-    sli.active = True # Slider reagiert auf Events
+    sli.active = True  # Slider reagiert auf Events
 
 
 class StdAbb(object):
     """Berechnet Standardabbildung nach Parametern Kickstaerke und
     maximaler Iterationstiefe.
-    
+
     Getrennte Arrays fuer Winkel und Impuls erstellen.
     self.standard_abbildung(self, t, p, redraw=False): Arrays Fuellen.
     """
+
     def __init__(self, K, max_iterationen):
         """Initialisierung der Parameter.
         self.kick = K : Aktueller Parameter Kickstaerke
@@ -72,11 +74,11 @@ class StdAbb(object):
         for i in range(self.max_iterationen):
             self.t_ar[i+1] = self.t_ar[i] + self.p_ar[i]
             self.p_ar[i+1] = self.p_ar[i] + self.kick * np.sin(self.t_ar[i+1])
-            
+
         self.t_ar = self.t_ar % (2.0 * np.pi)       # Modulo-Operationen
         self.p_ar = (self.p_ar + np.pi) % (2.0 * np.pi) - np.pi
         if not redraw:                              # Append Startposition
-            self.tupstart += ([t,p],)
+            self.tupstart += ([t, p],)
 
         return self.t_ar[:], self.p_ar[:]           # Return beide Listen
 
@@ -90,6 +92,7 @@ class StdAbbPlot(object):
     Maus : Links - Ausführen von Startposition.
            Rechts- Mehrere Startpositionen um Klick konzentriert.
     """
+
     def __init__(self, stdabb, ueb=False, uebx=10, ueby=4):
         """
         Plot initialisieren.
@@ -103,21 +106,21 @@ class StdAbbPlot(object):
         self.stdabb = stdabb                            # Berechnungsobjekt
         self.kick = stdabb.kick                         # Startwert K
         self.axcolor = 'lightgoldenrodyellow'
-        self.fig = plt.figure(figsize=(12,10))          # Plot-Initialisierung
+        self.fig = plt.figure(figsize=(12, 10))          # Plot-Initialisierung
         self.ueb = ueb
         self.uebx = uebx
         self.ueby = ueby
         self._interface = False
-        
+
     def interface(self, kmin=0.0, kmax=8.0, drag=True):
         """Erstellt Hauptbereich, Reset Button, Slider K.
         Zeichnet Uebersicht wenn `self.ueb`.
         Verbindet 'button_press_event' mit self.mausklick.
         """
         if self._interface:
-            return 
+            return
         self._interface = True
-        
+
         # Verknuepfung des button_press_event mit Funktion
         self.fig.canvas.mpl_connect('button_press_event', self.mausklick)
         # Rufe Erstellen `hauptbereich`
@@ -128,12 +131,12 @@ class StdAbbPlot(object):
                                kmin, kmax, valinit=self.kick, dragging=drag)
         self.slid_cid = self.slider_K.on_changed(self.kupdate)
         # Einstellung der Achsenmarkierung
-        self.axK.set_xticks(np.linspace(0,8.0, 9))
+        self.axK.set_xticks(np.linspace(0, 8.0, 9))
 
         # Reset Button
         self.resetax = plt.axes([0.8, 0.025, 0.1, 0.04])
         self.button_r = Button(
-                self.resetax, 'Reset', color=self.axcolor, hovercolor='0.975')
+            self.resetax, 'Reset', color=self.axcolor, hovercolor='0.975')
         self.button_r.on_clicked(self.reset_plot)
         # Uebersicht zeichnen
         if self.ueb:
@@ -144,25 +147,27 @@ class StdAbbPlot(object):
         """Komplettiert Achse `self.hauptbereich` fuer Darstellung der
         Standardabbildung. Beschriftung und Achsenmarkierung.
         """
-        if not self._interface: return 
+        if not self._interface:
+            return
         # Subplot mit Bedingungen
         self.hauptbereich = plt.subplot(111)
         self.fig.subplots_adjust(bottom=0.20)
 
         self.hauptbereich.axis([0, 2*np.pi, -np.pi, np.pi]) 	# Plotbereich
         self.hauptbereich.set_title(
-                    r"$Standardabbildung\ zu\ variabler\ Kickst\"{a}rke$",
-                    x=0.49, y=1.05, fontsize=24)
+            r"$Standardabbildung\ zu\ variabler\ Kickst\"{a}rke$",
+            x=0.49, y=1.05, fontsize=24)
         self.hauptbereich.set_xlabel("$Winkel\ \Theta$", fontsize=17)
         self.hauptbereich.set_ylabel("$Impuls\ p$", fontsize=17)
 
         # Einstellung der Achsenmarkierungen
-        self.hauptbereich.set_xticks(np.linspace(0,2*np.pi, 6))
-        self.hauptbereich.set_yticks(np.linspace(- np.pi , np.pi, 6))
+        self.hauptbereich.set_xticks(np.linspace(0, 2*np.pi, 6))
+        self.hauptbereich.set_yticks(np.linspace(- np.pi, np.pi, 6))
 
     def reset_hauptbereich(self):
         """Loeschen der gezeichneten `lines`."""
-        if not self._interface: return 
+        if not self._interface:
+            return
         # Reset Hauptbereich
         del self.hauptbereich.lines[:]
 
@@ -172,28 +177,30 @@ class StdAbbPlot(object):
         Klick: (links: self.plotabb), (rechts: self.multiklick)
         Berechnen und Zeichnen der zugehoerigen Standardabbildung.
         """
-        if not self._interface: return 
+        if not self._interface:
+            return
         mode = plt.get_current_fig_manager().toolbar.mode
         # Test ob Klick mit linker oder rechter Maustaste und im Koordsys.
         # erfolgt sowie ob Funktionen des Plotfensters deaktiviert sind:
-        if (event.button in (1,3) and event.inaxes==self.hauptbereich
-                and mode==''):
+        if (event.button in (1, 3) and event.inaxes == self.hauptbereich
+                and mode == ''):
             # Uebernehmen der Mausposition
             x = event.xdata
             y = event.ydata
             if not 0 <= x <= 2.0 * np.pi or not -np.pi <= y <= np.pi:
                 # Klick ausserhalb Standardabbildung -> return
                 print("Ungueltiger Bereich")
-                return 
-            if event.button == 1: # Linker Mausklick
-                print("Start:", (x, y)) # Ausgabe der Startwerte
+                return
+            if event.button == 1:  # Linker Mausklick
+                print("Start:", (x, y))  # Ausgabe der Startwerte
                 self.plotabb(x, y)
-            if event.button == 3: # Rechter Mausklick
+            if event.button == 3:  # Rechter Mausklick
                 self.multiklick(x, y)
 
     def plotabb(self, startx, starty):
         """Zeichnen von Startposition und Berechnen und Zeichnen Iterationen."""
-        if not self._interface: return 
+        if not self._interface:
+            return
         # Berechnen der zwei Listen
         t_array, p_array = self.stdabb.standard_abbildung(startx, starty)
         # Zeichnen in Grafik, jeweils neue Farbe
@@ -205,14 +212,15 @@ class StdAbbPlot(object):
         """ Ein Klick ruft `self.plotabb(x, y)` von mehreren Startpunkten auf.
         Zusaetzliche `numw` aequidistante Punkte auf Umkreisen um Klickpos.
         """
-        if not self._interface: return 
+        if not self._interface:
+            return
         print("Berechne Iterationen...")
         # Mittelpunkt
         self.plotabb(x, y)
         # numr Kreise mit numw Punkten
-        for r in np.arange(numr) + 1: # von 1 bis numr
+        for r in np.arange(numr) + 1:  # von 1 bis numr
             radius = maxr / numr * r
-            for w in range(numw): # von Null bis Winkel-1
+            for w in range(numw):  # von Null bis Winkel-1
                 xp = x + radius*np.cos(2.*np.pi * w / numw)
                 yp = y + radius*np.sin(2.*np.pi * w / numw)
                 self.plotabb(xp, yp)
@@ -224,7 +232,8 @@ class StdAbbPlot(object):
         x in self.uebx, und in y in self.ueby Schritten.
         Diese werden in Zeichenbereich hinzugefuegt - jeweils in neuer Farbe.
         """
-        if not self._interface: return 
+        if not self._interface:
+            return
         for x in np.linspace(0.0, 2.0*np.pi, num=self.uebx, endpoint=False):
             for y in np.linspace(-np.pi, np.pi, num=self.ueby, endpoint=False):
                 # Berechnen der zwei Listen
@@ -238,17 +247,19 @@ class StdAbbPlot(object):
         Resettet mit `self.reset_hauptbereich` und laesst alle Startpositionen
         mittels `self.stdabb.standard_abbildung` neu iterieren.
         """
-        if not self._interface: return 
+        if not self._interface:
+            return
         sli_freeze(self.slider_K)                       # Slider inaktiv
         print("Aktualisiere Iterationen...")
-        self.stdabb.kickneu(val)                        # Uebernehmen neuer Wert
+        # Uebernehmen neuer Wert
+        self.stdabb.kickneu(val)
         self.reset_hauptbereich()                       # Reset Hauptbereich
 
         for i in range(len(self.stdabb.tupstart)):      # Neu Berechnen
             # Berechnen der zwei Listen
             tlist, plist = self.stdabb.standard_abbildung(
-                        self.stdabb.tupstart[i][0], self.stdabb.tupstart[i][1],
-                        redraw=True)
+                self.stdabb.tupstart[i][0], self.stdabb.tupstart[i][1],
+                redraw=True)
             # Zeichnen in Grafik, jeweils neue Farbe
             self.hauptbereich.plot(tlist, plist, "o", markersize=2.)
 
@@ -259,7 +270,8 @@ class StdAbbPlot(object):
 
     def reset_plot(self, event):
         """Bereinige vorherige Nutzerinteraktionen."""
-        if not self._interface: return 
+        if not self._interface:
+            return
         # Reset Hauptbereich
         self.reset_hauptbereich()
         # Reset gespeicherte Startpositionen
@@ -291,11 +303,12 @@ def main():
 
     realisierung = StdAbb(1.6, max_iterationen)
     plot1 = StdAbbPlot(realisierung)
-    
+
     plot1.interface()
     plot1.show()
 
-#-------------Main Programm-------------------
+
+# -------------Main Programm-------------------
 if __name__ == "__main__":
     main()
 

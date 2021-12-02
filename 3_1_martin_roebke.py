@@ -8,12 +8,13 @@ Plot-Darstellung doppellog. mit Legende und analytischem Skalierungsverhalten.
 Diskussion in End-Kommentar.
 """
 
-from __future__ import division, print_function # problemlose Ganzzahl-Division
+from __future__ import division, print_function  # problemlose Ganzzahl-Division
 import numpy as np                              # Arrays, Mathe etc
 import matplotlib.pyplot as plt                 # Plotten
 from functools import partial                   # args Vorbelegung
 
-def IntMPRegel(f, start, ende, n:int):
+
+def IntMPRegel(f, start, ende, n: int):
     """Berechnet Integral der reellen Funktion 'f' zwischen Stellen
     'start' und 'ende' nach Mittelpunktsregel mit 'n' Segmenten.
     """
@@ -24,6 +25,7 @@ def IntMPRegel(f, start, ende, n:int):
     ergebnis = h * sum(f(array_stuetz))
     return ergebnis
 
+
 def IntTRRegel(f, start, ende, n):
     """Berechnet Integral der reellen Funktion 'f' zwischen Stellen
     'start' und 'ende' nach Trapezregel mit 'n' Segmenten.
@@ -33,6 +35,7 @@ def IntTRRegel(f, start, ende, n):
     # Integral berechnen
     ergebnis = h * (sum(f(array_stuetz)) - 0.5*(f(start) + f(ende)))
     return ergebnis
+
 
 def IntSMRegel(f, start, ende, n):
     """Berechnet Integral der reellen Funktion 'f' zwischen Stellen
@@ -47,9 +50,11 @@ def IntSMRegel(f, start, ende, n):
     ergebnis = h * (4*summehalbN + 2*summeganzN - f(start) - f(ende)) / 6
     return ergebnis
 
+
 def relativ_Fehler(wert, erwartet):
     """Relativer Fehler von 'wert' bezueglich einer Referenz 'erwartet'."""
     return abs((wert - erwartet) / erwartet)
+
 
 def func(x=None, string=False, aufgabe='a'):
     """Reelle Funktion mit Argument x, Grundlage zu Berechnung.
@@ -87,6 +92,7 @@ def func(x=None, string=False, aufgabe='a'):
         # Funktion f(x) ueber Array
         return 0.5*(1.0+np.sign(x))
 
+
 def main():
     """Mainfunktion: Numerische Methoden II (Integration).
     Eingabe der Parameter und Darstellung.
@@ -111,7 +117,7 @@ def main():
     print("von", a, "bis", b, ".")
     print("\nKeine Benutzer-Interaktion erforderlich.")
 
-    fig = plt.figure(figsize=(11,8))                    # Plot-Initialisierung
+    fig = plt.figure(figsize=(11, 8))                    # Plot-Initialisierung
     fig.subplots_adjust(top=0.87)                       # Borders
     plt.subplot(111, xscale="log", yscale="log")        # Subplot
     plt.title("Integral numerisch")                     # Plot-Titel
@@ -130,16 +136,17 @@ def main():
         F_TR[i] = relativ_Fehler(IntTRRegel(f, a, b, n), analytisch_wert)
         F_SM[i] = relativ_Fehler(IntSMRegel(f, a, b, n), analytisch_wert)
 
-    plt.plot(h, F_MP, "r.", label= "Mittelpunktsregel")
-    plt.plot(h, F_TR, "b.", label= "Trapezregel")
-    plt.plot(h, F_SM, "g.", label= "Simpsonregel")
-    plt.plot(h, h*h*0.025, "k--", label= r"$\sim h^{2}$", lw=2.1)
+    plt.plot(h, F_MP, "r.", label="Mittelpunktsregel")
+    plt.plot(h, F_TR, "b.", label="Trapezregel")
+    plt.plot(h, F_SM, "g.", label="Simpsonregel")
+    plt.plot(h, h*h*0.025, "k--", label=r"$\sim h^{2}$", lw=2.1)
     h_four = h[:50]
-    plt.plot(h_four, h_four**4*10**-3, "k-.", label= r"$\sim h^{4}$", lw=1.6)
+    plt.plot(h_four, h_four**4*10**-3, "k-.", label=r"$\sim h^{4}$", lw=1.6)
     legend = plt.legend(loc='best', numpoints=3)        # Legende
     plt.show()                                          # Zeigen des Fensters
 
-#-------------Main Programm-------------------
+
+# -------------Main Programm-------------------
 if __name__ == "__main__":
     main()
 

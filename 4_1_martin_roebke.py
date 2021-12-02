@@ -14,19 +14,21 @@ Rechter Plotbereich: zu t = 2pi/w*i stroboskopische Darstellung.
 Linker Mausklick in einen der Plots legt Startwerte fuer Teilchen fest.
 """
 
-from __future__ import division, print_function # problemlose Ganzzahl-Division
+from __future__ import division, print_function  # problemlose Ganzzahl-Division
 import numpy as np                              # Arrays, Mathe etc
 import matplotlib.pyplot as plt                 # Plotten
 from matplotlib import rc as mplrc
 from cycler import cycler                       # Colorcycle
 from scipy.integrate import odeint              # Integrationsroutine fuer DGL
 
+
 def abl_hamilton(x, t, A, B, w):
     """Rechte Seite der DGL - Hamilton-Funktion
     - dH(x, p, t)/dx
     Parameter t: Zeit, A: Absolut-Linearterm, B: Schwingung, w: Kreisfrequenz
     """
-    return np.array([x[1], -4*x[0]**3 +2*x[0] -(A+B*np.sin(w*t))])
+    return np.array([x[1], -4*x[0]**3 + 2*x[0] - (A+B*np.sin(w*t))])
+
 
 class DoppelmuldeDGL(object):
     """Berechnet und zeichnet Phasenraumtrajektorien und stroboskopische
@@ -35,6 +37,7 @@ class DoppelmuldeDGL(object):
     Darstellung und Wahl des Startzustandes mittels Mausklick
     in einen der zwei Achsenbereiche.
     """
+
     def __init__(self, a, b, w, abl, perioden, num_t=500):
         """Initialisierung der Parameter.
         Pruefung auf Winkelgeschwindigkeit rund Null.
@@ -44,7 +47,8 @@ class DoppelmuldeDGL(object):
         """
         self.a = a
         self.b = b
-        if w<10**-15: raise ValueError("Kreisfrequenz w="+str(w)+" zu klein!")
+        if w < 10**-15:
+            raise ValueError("Kreisfrequenz w="+str(w)+" zu klein!")
         self.w = w
         self.abl = abl
         self.perioden = perioden
@@ -55,7 +59,7 @@ class DoppelmuldeDGL(object):
         self.traj_t = np.linspace(0.0,                          # Startzeit
                                   perioden*2.0*np.pi/self.w,    # Letzte Zeit
                                   perioden*num_t + 1            # Punkte + Start
-        )
+                                  )
 
     def cr_figure(self, achsenweite):
         """Initialisieren und Beschriften der Plot-Figur mit zwei Achsen.
@@ -91,16 +95,17 @@ class DoppelmuldeDGL(object):
             Default ist np.linspace(0, 3, 9)**2.5
         delta : reelle Zahl, Feinheit zwischen Stuetzstellen.
         """
-        if levels is None: levels = np.linspace(0, 3, 9)**2.5
+        if levels is None:
+            levels = np.linspace(0, 3, 9)**2.5
         x = np.arange(self.axw[0], self.axw[1], delta)
         y = np.arange(self.axw[2], self.axw[3], delta)
         xl, pl = np.meshgrid(x, y)
         H = 0.5*pl*pl + xl**4 - xl**2 + self.a*xl
         self.axes1.contour(xl, pl, H, levels, colors='black')
         self.axes2.contour(xl, pl, H, levels, colors='black')
-        #~ QCS = self.axes1.contour(xl, pl, H, levels, colors='black')
-        #~ for seg in QCS.allsegs: # Instabil Aber Schneller :
-            #~ self.axes2.plot(seg[0][:,0], seg[0][:,1], c='k')
+        # ~ QCS = self.axes1.contour(xl, pl, H, levels, colors='black')
+        # ~ for seg in QCS.allsegs: # Instabil Aber Schneller :
+        #~ self.axes2.plot(seg[0][:,0], seg[0][:,1], c='k')
 
     def _klick(self, event):
         """Berechnet und Plottet neue Trajektorien.
@@ -122,13 +127,14 @@ class DoppelmuldeDGL(object):
         x_t = odeint(self.abl, startwert, self.traj_t,
                      args=(self.a, self.b, self.w))     # Berechnen Trajektorie
         strobo = x_t[::self.num_t]      # Kopieren der stroboskopischen Punkte
-        self.axes1.plot(x_t[:,0], x_t[:,1], ".", ls="-")
-        self.axes2.plot(strobo[:,0], strobo[:,1], "o", ms=3., mew=0)
+        self.axes1.plot(x_t[:, 0], x_t[:, 1], ".", ls="-")
+        self.axes2.plot(strobo[:, 0], strobo[:, 1], "o", ms=3., mew=0)
         self.fig.canvas.draw()
 
     def show(self):
         """Zeige alle erstellten Figuren. Warte auf Benutzerinteraktion."""
         plt.show()
+
 
 def main():
     """Mainfunktion Doppelmuldenpotential.
@@ -145,7 +151,7 @@ def main():
     mplrc('axes', prop_cycle=(cycler('color', ['r', 'c', 'm', 'y', 'b', 'g'])))
 
     # Anfangstext Konsole
-    print(__doc__,"\n")
+    print(__doc__, "\n")
 
     # Realisierung
     rea = DoppelmuldeDGL(a, b, w, abl, perioden, t_pro_periode)
@@ -153,7 +159,8 @@ def main():
     rea._kontur()                                    # Konturlinien zeichnen
     rea.show()                                      # Darstellung + Interaktion
 
-#-------------Main Programm----------------
+
+# -------------Main Programm----------------
 if __name__ == "__main__":
     main()                                          # Rufe Mainroutine
 
