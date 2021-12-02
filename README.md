@@ -23,32 +23,32 @@ V(x) = x^4 - x^2 + x[A + B*sin(w*t)]
 ![Figure_4](resources/Figure_4.png "Dynamics of a particle in the driven double trough potential.")
 
 ## Computational Physics Task 5.1
-Elementary numerical methods I
+Quantum mechanics of 1D potentials
 
-![Figure_5](resources/Figure_5.png "Determining the derivative of a function f(x) using three different methods")
+![Figure_5](resources/Figure_5.png "Quantum mechanics of 1D potentials")
 
 ## Computational Physics Task 6.1
-Elementary numerical methods I
+Quantum mechanics of 1D potentials II - time evolution
 
-![Figure_6](resources/Figure_6.png "Determining the derivative of a function f(x) using three different methods")
+![Figure_6](resources/Figure_6.png "Quantum mechanics of 1D potentials II - time evolution")
 
 ## Computational Physics Task 7.1
-Elementary numerical methods I
+Quantum mechanics of 1D potentials III - periodic potentials and tight-binding approximation
 
-![Figure_7](resources/Figure_7.png "Determining the derivative of a function f(x) using three different methods")
+![Figure_7](resources/Figure_7.png "Quantum mechanics of 1D potentials III")
 
 ## Computational Physics Task 8.1
-Elementary numerical methods I
+Calculation of average pressure in time interval dt, which is exerted on side surface A of a cuboid with N particles inside
 
 ![Figure_8](resources/Figure_8.png "Determining the derivative of a function f(x) using three different methods")
 
 ## Computational Physics Task 9.1
-Elementary numerical methods I
+Numerical simulation of particle locations in diffusion + drift and absorption
 
 ![Figure_9](resources/Figure_9.png "Determining the derivative of a function f(x) using three different methods")
 
 ## Computational Physics Task 10.1
-Elementary numerical methods I
+2D Ising model, where in the left plot the spin state of a 50x50 grid with periodic boundary conditions is shown.
 
 ![Figure_10](resources/Figure_10.png "Determining the derivative of a function f(x) using three different methods")
 
