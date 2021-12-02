@@ -1,0 +1,9 @@
+name: compphys2016
+channels:
+  - defaults
+dependencies:
+  - python>=3.5
+  - cycler
+  - matplotlib
+  - numpy
+  - scipy
