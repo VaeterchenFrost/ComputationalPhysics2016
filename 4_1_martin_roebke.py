@@ -14,13 +14,14 @@ Rechter Plotbereich: zu t = 2pi/w*i stroboskopische Darstellung.
 Linker Mausklick in einen der Plots legt Startwerte fuer Teilchen fest.
 """
 
-import numpy as np  # Arrays, Mathe etc
-import matplotlib.pyplot as plt  # Plotten
-from matplotlib import rc as mplrc
-from cycler import cycler  # Colorcycle
-from scipy.integrate import odeint  # Integrationsroutine fuer DGL
-from matplotlib.backend_bases import MouseEvent
 from typing import Callable, List, Union
+
+import matplotlib.pyplot as plt  # Plotten
+import numpy as np  # Arrays, Mathe etc
+from cycler import cycler  # Colorcycle
+from matplotlib import rc as mplrc
+from matplotlib.backend_bases import MouseEvent
+from scipy.integrate import odeint  # Integrationsroutine fuer DGL
 
 
 def abl_hamilton(x: np.ndarray, t: float, A: float, B: float, w: int) -> np.ndarray:
@@ -39,7 +40,9 @@ class DoppelmuldeDGL(object):
     in einen der zwei Achsenbereiche.
     """
 
-    def __init__(self, a: float, b: float, w: int, abl: Callable, perioden: int, num_t: int=500):
+    def __init__(
+        self, a: float, b: float, w: int, abl: Callable, perioden: int, num_t: int = 500
+    ):
         """Initialisierung der Parameter.
         Pruefung auf Winkelgeschwindigkeit rund Null.
         Konsolenausgabe der Parameter nach Initialisierung.
@@ -87,7 +90,7 @@ class DoppelmuldeDGL(object):
         # Bei Mausklick aufrufen:
         self.fig.canvas.mpl_connect("button_press_event", self._klick)
 
-    def _kontur(self, levels: None=None, delta: float=0.025):
+    def _kontur(self, levels: None = None, delta: float = 0.025):
         """Helferfunktion. Berechnen von Konturlinien der Werte in *levels* mit
         Energie H = 0.5*pl*pl + xl**4 - xl**2 + self.a*xl
         innerhalb von Breich *self.axw* mit einer Disketisierung *delta*.

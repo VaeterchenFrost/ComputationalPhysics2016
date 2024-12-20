@@ -13,11 +13,12 @@ class StdAbbPlot(object)
     Zeichnung Phasenraum und Verwaltung der Nutzer-Interaktion.
 """
 
+from typing import Tuple
+
 import matplotlib.pyplot as plt  # Plotten
 import numpy as np  # Arrays, Mathe etc
-from matplotlib.widgets import Slider, Button  # Plot-Widgets
 from matplotlib.backend_bases import MouseEvent
-from typing import Tuple
+from matplotlib.widgets import Button, Slider  # Plot-Widgets
 
 
 def sli_freeze(sli):
@@ -62,7 +63,9 @@ class StdAbb(object):
         """
         self.kick = val
 
-    def standard_abbildung(self, t: float, p: float, redraw: bool=False) -> Tuple[np.ndarray, np.ndarray]:
+    def standard_abbildung(
+        self, t: float, p: float, redraw: bool = False
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Berechnet Standardabbildung nach Parametern
         Getrennte Arrays fuer theta und Impuls erstellen und berechnen.
 
@@ -94,7 +97,9 @@ class StdAbbPlot(object):
            Rechts- Mehrere Startpositionen um Klick konzentriert.
     """
 
-    def __init__(self, stdabb: StdAbb, ueb: bool=False, uebx: int=10, ueby: int=4):
+    def __init__(
+        self, stdabb: StdAbb, ueb: bool = False, uebx: int = 10, ueby: int = 4
+    ):
         """
         Plot initialisieren.
         Parameter:
@@ -113,7 +118,7 @@ class StdAbbPlot(object):
         self.ueby = ueby
         self._interface = False
 
-    def interface(self, kmin: float=0.0, kmax: float=8.0, drag: bool=True):
+    def interface(self, kmin: float = 0.0, kmax: float = 8.0, drag: bool = True):
         """Erstellt Hauptbereich, Reset Button, Slider K.
         Zeichnet Uebersicht wenn `self.ueb`.
         Verbindet 'button_press_event' mit self.mausklick.
@@ -213,7 +218,9 @@ class StdAbbPlot(object):
         del t_array, p_array  # Freigeben
         self.fig.canvas.draw()
 
-    def multiklick(self, x: float, y: float, maxr: float=0.08, numr: int=4, numw: int=3):
+    def multiklick(
+        self, x: float, y: float, maxr: float = 0.08, numr: int = 4, numw: int = 3
+    ):
         """Ein Klick ruft `self.plotabb(x, y)` von mehreren Startpunkten auf.
         Zusaetzliche `numw` aequidistante Punkte auf Umkreisen um Klickpos.
         """

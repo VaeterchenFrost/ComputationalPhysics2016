@@ -10,9 +10,10 @@ Drei Methoden:
    AE(x) = 1/3h( 8 (f(x+h/4)-f(x-h/4)) - (f(x+h/2)-f(x-h/2)))
 """
 
-from typing import Union, Callable
-import numpy as np  # Arrays, Mathe etc
+from typing import Callable, Union
+
 import matplotlib.pyplot as plt  # Plotten
+import numpy as np  # Arrays, Mathe etc
 
 
 def relativ_Fehler(wert: float, erwartet: float) -> np.ndarray:
