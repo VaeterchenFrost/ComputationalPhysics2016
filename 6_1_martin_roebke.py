@@ -14,52 +14,35 @@ jeweils neueste Paket berechnet und verfolgt.
 Alle vorherigen Wellenpakete werden verworfen.
 """
 
-from __future__ import division, print_function  # problemlose Ganzzahl-Division
-import numpy as np                              # Arrays, Mathe etc
-import matplotlib.pyplot as plt                 # Plotten
-import quantenmechanik as qm                    # Eigenwerte und -funktionen 1D
-from functools import partial                   # Voreinstellung *args **kwargs
+import matplotlib.pyplot as plt
+import numpy as np
+import sympy
+
+import quantenmechanik as qm  # Eigenwerte und -funktionen 1D
 
 
-def doppelmulde(x=None, A=0.05, string=False):
-    """doppelmulde(x=None, A=0.05, string=False)
-    Rueckgabe : x**4-x*x-A*x
-    Parameter:
-    x : array_like
-        Argument der Funktion.
-    A : reelle Zahl
-        Parameter der Funktion.
-    string : boolean, optional
-        Wenn True wird eine Funktionsbeschreibung als String zurueckgegeben.
+def doppelmulde(A: float = 0.05):
+    x = sympy.Symbol("x")
+    return x**4 - x * x + A * x
+
+
+def gaussian_wave_paket(xa, sigma=1.0, x0=0.0, heff=1.0, p0=0.0):
     """
-    if string:
-        if A == 0:
-            return r"$x^4-x^2$"
-        if A > 0:
-            return r"$x^4-x^2-{}*x$".format(A)
-        if A < 0:
-            return r"$x^4-x^2+{}*x$".format(-A)
-    return x**4 - x*x - A*x
-
-
-def gaussian_wave_paket(xa, sigma=1., x0=0., heff=1., p0=0.):
-    """gaussian_wave_paket(xa, sigma=1., x0=0., heff=1., p0=0.)
     Berechnung Gauss'sches Wellenpaket mit
     mittlerem Ort `x0`, Standardabweichung `sigma`,
     mittlerem Impuls `p0`, effektives hquer `heff` an den Orten `xa`.
-    (2*np.pi*sigma**2)**-0.25 * np.exp(-((x-x0)/(2*sigma))**2 + 1j/heff*p0*x)
 
     Rueckgabe:
         phi : array-like Wellenpaket.
     """
     # Umwandeln des Ausgangsarrays `x` zu komplex:
     x = np.array(xa, dtype=complex)
-    fak = (2*np.pi*sigma*sigma)**-0.25              # Vorfaktor
-    arg = -((x - x0)/(2*sigma))**2                  # Erstes Argument von exp
-    if p0 == 0.:                                      # p0 gleich 0.
-        phi = fak*np.exp(arg)
-    else:                                           # Wenn p0!=0.
-        phi = fak*np.exp(arg)*np.exp(1j/heff*p0*x)
+    fak = (2 * np.pi * sigma * sigma) ** -0.25  # Vorfaktor
+    arg = -(((x - x0) / (2 * sigma)) ** 2)  # Erstes Argument von exp
+    if p0 == 0.0:
+        phi = fak * np.exp(arg)
+    else:  # p0 != 0
+        phi = fak * np.exp(arg) * np.exp(1j / heff * p0 * x)
     return phi
 
 
@@ -71,9 +54,26 @@ class QMZeitentwicklung(object):
     gewaehlte Zeiten per Zeitoperator entwickelt.
     """
 
-    def __init__(self, axis, potential, emax, p0, heff, sigma, xr_s, xr_e, nr,
-                 tmin=0, tmax=10, num_t=200, title=None, fak=.01,
-                 phi_color='k', update_ef=True, wait_dt=0.01):
+    def __init__(
+        self,
+        axis,
+        potential,
+        emax,
+        p0,
+        heff,
+        sigma,
+        xr_s,
+        xr_e,
+        nr,
+        tmin=0,
+        tmax=10,
+        num_t=200,
+        title=None,
+        fak=0.01,
+        phi_color="k",
+        update_ef=True,
+        wait_dt=0.01,
+    ):
         """Initialisierung der Parameter.
         Pruefung auf `mindestens eine gegebene Zeit`, da Zeitentwicklung sonst
         hinfaellig.
@@ -96,10 +96,14 @@ class QMZeitentwicklung(object):
            update_ef:  boolean; Passe Erscheinung der Eigenfunktionen an c_n an.
            wait_dt:    Zahl >=0; Plot-Pause zwischen Zeitschritten.
         """
-        print("QMZeitentwicklung Initialisierung mit \np0 = {}, heff = {}, "
-              "sigma = {}, N = {}.".format(p0, heff, sigma, nr))
+        print(
+            "QMZeitentwicklung Initialisierung mit \np0 = {}, heff = {}, "
+            "sigma = {}, N = {}.".format(p0, heff, sigma, nr)
+        )
         self.axis = axis
-        self.potential = potential
+        self.potential = sympy.lambdify(
+            list(potential.free_symbols), potential, modules="numpy"
+        )
         self.emax = emax
         self.p0 = p0
         self.heff = heff
@@ -115,7 +119,7 @@ class QMZeitentwicklung(object):
         self.update_ef = update_ef
         self.wait_dt = wait_dt
         self.startnum = 0
-        self.berechnet = False                      # Schalter: Berechnung ok.
+        self.berechnet = False  # Schalter: Berechnung ok.
 
     def berechnung_esys(self):
         """Diagonalisierung der Hamilton-Matrix.
@@ -123,8 +127,9 @@ class QMZeitentwicklung(object):
         Berechnung von `self.ew`, `self.ef` mittels `qm.diagonalisierung`.
         """
         # Berechnung
-        self.x, self.dx = qm.diskretisierung(self.xr_s, self.xr_e, self.nr,
-                                             retstep=True)
+        self.x, self.dx = qm.diskretisierung(
+            self.xr_s, self.xr_e, self.nr, retstep=True
+        )
         self.pot_x = self.potential(self.x)
         self.ew, self.ef = qm.diagonalisierung(self.heff, self.x, self.pot_x)
         self.berechnet = True
@@ -140,20 +145,28 @@ class QMZeitentwicklung(object):
         if self.berechnet is False:
             self.berechnung_esys()
         # Plottet: Potential - Eigenwerte Basislinie, Eigenfunktionen
-        qm.plot_eigenfunktionen(self.axis, self.ew, self.ef, self.x, self.pot_x,
-                                Emax=self.emax, fak=self.fak,
-                                betragsquadrat=True, title=self.title)
-        if self.update_ef:                          # Abspeichern der EF-lines.
+        qm.plot_eigenfunktionen(
+            self.axis,
+            self.ew,
+            self.ef,
+            self.x,
+            self.pot_x,
+            Emax=self.emax,
+            fak=self.fak,
+            betragsquadrat=True,
+            title=self.title,
+        )
+        if self.update_ef:  # Abspeichern der EF-lines.
             self.num_ef = (len(self.axis.lines) - 1) / 2
-            self.ef_iter = range(int(self.num_ef+1), len(self.axis.lines))
+            self.ef_iter = range(int(self.num_ef + 1), len(self.axis.lines))
             self.eflines = np.array(self.axis.lines)[self.ef_iter]
-        plt.setp(self.axis.title, fontsize=20)      # Passe Titelgroesse an.
+        plt.setp(self.axis.title, fontsize=20)  # Passe Titelgroesse an.
 
         # Bereitstellen der Plotlinie fuer `zeitentw`
-        self.zeitentw, = self.axis.plot([], [], self.phi_color, linewidth=1.2)
+        (self.zeitentw,) = self.axis.plot([], [], self.phi_color, linewidth=1.2)
         # Verknuepfung des button_press_event mit Funktion
         figc = self.axis.get_figure()
-        figc.canvas.mpl_connect('button_press_event', self._mausklick)
+        figc.canvas.mpl_connect("button_press_event", self._mausklick)
 
     def _mausklick(self, event):
         """Bei Klick mit linker Maustaste in `self.axis`:
@@ -171,42 +184,44 @@ class QMZeitentwicklung(object):
         mode = plt.get_current_fig_manager().toolbar.mode
         # Test ob Klick mit linker Maustaste und im Koordinatensystem
         # erfolgt ist, sowie ob Funktionen des Plotfensters deaktiviert sind:
-        if not (event.button == 1 and event.inaxes == self.axis and mode == ''):
+        if not (event.button == 1 and event.inaxes == self.axis and mode == ""):
             return
         x0 = event.xdata
-        self.phi = gaussian_wave_paket(self.x, self.sigma, x0,
-                                       self.heff, self.p0)
+        self.phi = gaussian_wave_paket(self.x, self.sigma, x0, self.heff, self.p0)
         # Wellenpaket in Eigenfunktionen entwickeln
-        self.c = self.dx*np.dot(self.ef.conj().T, self.phi)
+        self.c = self.dx * np.dot(self.ef.conj().T, self.phi)
         # Rekonstruktion aus Entwicklung nach EF
         self.phi_rec = np.dot(self.ef, self.c)
         normdiff = np.linalg.norm(self.phi - self.phi_rec) * np.sqrt(self.dx)
 
         # Energieerwartungswert unter Verwendung von c_n:
-        self.phi_ew = np.dot(abs(self.c)**2, self.ew)
+        self.phi_ew = np.dot(abs(self.c) ** 2, self.ew)
 
         if self.update_ef:
             # Visualisiere EF-Width
             for i, line in enumerate(self.eflines):
-                line.set_linewidth(abs(self.c[i])*2.5)
+                line.set_linewidth(abs(self.c[i]) * 2.5)
 
         # Zeitentwicklung berechnen
         self.startnum += 1
         startnum = self.startnum
         print("Paket [{}]: Start an x0 = {:.3f}".format(startnum, x0))
         print("    Differenz in Rekonstruktion: {:.3e}".format(normdiff))
-        print("    Zeit-Darstellung von t={} bis {} in {} Schritten."
-              "".format(self.t[0], self.t[-1], len(self.t)))
+        print(
+            "    Zeit-Darstellung von t={} bis {} in {} Schritten."
+            "".format(self.t[0], self.t[-1], len(self.t))
+        )
 
         self.zeitentw.set_xdata(self.x)
-        for t in self.t:                            # Zeitschritte darstellen.
+        for t in self.t:  # Zeitschritte darstellen.
             # Nicht-Nachholen bei Unterbrechung.
             if startnum < self.startnum:
                 return
             # Zeitentwicklung auf Phi-Koeffizienten:
-            self.phi_rec = np.dot(self.ef,
-                                  self.c * np.exp(-1j * self.ew * t / self.heff))
-            self.plot_phi = self.fak*np.abs(self.phi_rec)**2 + self.phi_ew
+            self.phi_rec = np.dot(
+                self.ef, self.c * np.exp(-1j * self.ew * t / self.heff)
+            )
+            self.plot_phi = self.fak * np.abs(self.phi_rec) ** 2 + self.phi_ew
             self.zeitentw.set_ydata(self.plot_phi)
             plt.pause(self.wait_dt)
         print("Paket [{}]: Zeit-Darstellung beendet.".format(startnum))
@@ -222,9 +237,9 @@ def main():
     """
     # Potential
     A = 0.00
-    potential = partial(doppelmulde, A=A)
+    potential = doppelmulde(A)
     emax = 0.3
-    p0 = 0.0                                        # Startimpuls
+    p0 = 0.0  # Startimpuls
     # Zugehoeriges hquer effektiv ~ Masse.
     heff = 0.07
     # Start-Breite Gauss-Wellenpaket.
@@ -236,12 +251,12 @@ def main():
     N = 200
     # Zeitdarstellung von `tmin` bis `tmax` in `num_t` Schritten
     tmin = 0
-    tmax = 100000
-    num_t = 300
+    tmax = 100
+    num_t = 1000
     # Allgemeiner Faktor EF-Skalierung.
     fak = 0.01
-    title = "$Potential:\quad$" + potential(string=True)
-    update_ef = True                                # Anpassung EF an c_n
+    title = "Potential:  ${}$".format(sympy.latex(potential))
+    update_ef = True  # Anpassung EF an c_n
     # Plot Figure
     fig, axis = plt.subplots(figsize=(12, 14))
 
@@ -249,15 +264,29 @@ def main():
     print(__doc__)
 
     # Instanziierung
-    rea = QMZeitentwicklung(axis, potential, emax, p0, heff, sigma, xr_s, xr_e,
-                            N, tmin, tmax, num_t, title, fak=fak, update_ef=update_ef)
-    rea.plot()                                      # Starte Darstellung
-    rea.show()                                      # Benutzerinteraktion
+    rea = QMZeitentwicklung(
+        axis,
+        potential,
+        emax,
+        p0,
+        heff,
+        sigma,
+        xr_s,
+        xr_e,
+        N,
+        tmin,
+        tmax,
+        num_t,
+        title,
+        fak=fak,
+        update_ef=update_ef,
+    )
+    rea.plot()  # Starte Darstellung
+    rea.show()  # Benutzerinteraktion
 
 
-# -------------Main Programm----------------
 if __name__ == "__main__":
-    main()                                          # Rufe Mainroutine
+    main()
 
 """Kommentar:
 Das qm. Tunneln ist kaum klassisch zu erklaeren - wohl aber durch den
