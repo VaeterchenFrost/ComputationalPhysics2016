@@ -10,17 +10,17 @@ Drei Methoden:
    AE(x) = 1/3h( 8 (f(x+h/4)-f(x-h/4)) - (f(x+h/2)-f(x-h/2)))
 """
 
-from typing import Callable
+from typing import Union, Callable
 import numpy as np  # Arrays, Mathe etc
 import matplotlib.pyplot as plt  # Plotten
 
 
-def relativ_Fehler(wert: float, erwartet: float):
+def relativ_Fehler(wert: float, erwartet: float) -> np.ndarray:
     """Relativer Fehler von 'wert' bezueglich einer Referenz 'erwartet'."""
     return abs((wert - erwartet) / erwartet)
 
 
-def func(x: float = 0, abl: int = 0, string: bool = False):
+def func(x: float = 0, abl: int = 0, string: bool = False) -> Union[float, np.ndarray]:
     """Reelle Funktion mit Argument x, Grundlage zu Berechnung.
     abl:
         0 Funktionswert.
@@ -40,17 +40,23 @@ def func(x: float = 0, abl: int = 0, string: bool = False):
     raise ValueError("'func' konnte Parameter nicht erkennen.")
 
 
-def vorwaertsDiff(f: Callable[[float], float], x: float, h: np.ndarray[float]):
+def vorwaertsDiff(
+    f: Callable[[float], float], x: float, h: np.ndarray[float]
+) -> np.ndarray:
     """return Ableitung der Funktion f an Stelle x nach Vorwaertsdifferenz mit Parameter h"""
     return 1.0 / h * (f(x + h) - f(x))
 
 
-def zentralDiff(f: Callable[[float], float], x: float, h: np.ndarray[float]):
+def zentralDiff(
+    f: Callable[[float], float], x: float, h: np.ndarray[float]
+) -> np.ndarray:
     """return Ableitung der Funktion f an Stelle x nach Zentraldifferenz mit Parameter h"""
     return 1.0 / h * (f(x + h / 2) - f(x - h / 2))
 
 
-def extrapolDiff(f: Callable[[float], float], x: float, h: np.ndarray[float]):
+def extrapolDiff(
+    f: Callable[[float], float], x: float, h: np.ndarray[float]
+) -> np.ndarray:
     """return Ableitung der Funktion f an Stelle x
     nach '1/3h *( 8*(f(x + h/4)-f(x - h/4)) - (f(x + h/2) - f(x - h/2)))'
     """
