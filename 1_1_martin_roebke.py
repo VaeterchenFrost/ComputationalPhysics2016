@@ -16,6 +16,8 @@ class StdAbbPlot(object)
 import matplotlib.pyplot as plt  # Plotten
 import numpy as np  # Arrays, Mathe etc
 from matplotlib.widgets import Slider, Button  # Plot-Widgets
+from matplotlib.backend_bases import MouseEvent
+from typing import Tuple
 
 
 def sli_freeze(sli):
@@ -41,7 +43,7 @@ class StdAbb(object):
     self.standard_abbildung(self, t, p, redraw=False): Arrays Fuellen.
     """
 
-    def __init__(self, K, max_iterationen):
+    def __init__(self, K: float, max_iterationen: int):
         """Initialisierung der Parameter.
         self.kick = K : Aktueller Parameter Kickstaerke
         self.max_iterationen = max_iterationen :
@@ -60,7 +62,7 @@ class StdAbb(object):
         """
         self.kick = val
 
-    def standard_abbildung(self, t, p, redraw=False):
+    def standard_abbildung(self, t: float, p: float, redraw: bool=False) -> Tuple[np.ndarray, np.ndarray]:
         """Berechnet Standardabbildung nach Parametern
         Getrennte Arrays fuer theta und Impuls erstellen und berechnen.
 
@@ -92,7 +94,7 @@ class StdAbbPlot(object):
            Rechts- Mehrere Startpositionen um Klick konzentriert.
     """
 
-    def __init__(self, stdabb, ueb=False, uebx=10, ueby=4):
+    def __init__(self, stdabb: StdAbb, ueb: bool=False, uebx: int=10, ueby: int=4):
         """
         Plot initialisieren.
         Parameter:
@@ -111,7 +113,7 @@ class StdAbbPlot(object):
         self.ueby = ueby
         self._interface = False
 
-    def interface(self, kmin=0.0, kmax=8.0, drag=True):
+    def interface(self, kmin: float=0.0, kmax: float=8.0, drag: bool=True):
         """Erstellt Hauptbereich, Reset Button, Slider K.
         Zeichnet Uebersicht wenn `self.ueb`.
         Verbindet 'button_press_event' mit self.mausklick.
@@ -175,7 +177,7 @@ class StdAbbPlot(object):
         # Reset Hauptbereich
         [line.remove() for line in self.hauptbereich.axes.lines]
 
-    def mausklick(self, event):
+    def mausklick(self, event: MouseEvent):
         """Pruefung auf Mausklick in gueltigen Bereich. Dann:
         x: Start-Winkel ; y: Start-Impuls.
         Klick: (links: self.plotabb), (rechts: self.multiklick)
@@ -200,7 +202,7 @@ class StdAbbPlot(object):
             if event.button == 3:  # Rechter Mausklick
                 self.multiklick(x, y)
 
-    def plotabb(self, startx, starty):
+    def plotabb(self, startx: float, starty: float):
         """Zeichnen von Startposition und Berechnen und Zeichnen Iterationen."""
         if not self._interface:
             return
@@ -211,7 +213,7 @@ class StdAbbPlot(object):
         del t_array, p_array  # Freigeben
         self.fig.canvas.draw()
 
-    def multiklick(self, x, y, maxr=0.08, numr=4, numw=3):
+    def multiklick(self, x: float, y: float, maxr: float=0.08, numr: int=4, numw: int=3):
         """Ein Klick ruft `self.plotabb(x, y)` von mehreren Startpunkten auf.
         Zusaetzliche `numw` aequidistante Punkte auf Umkreisen um Klickpos.
         """
