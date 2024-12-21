@@ -9,11 +9,9 @@ Die Langevin-Gleichung : x(t+dt)= x(t) + v*dt + wurzel(2*D*dt)*Gauss_normiert
 ::Linker Mausklick in einen der vier Plotbereiche startet Zeititeration::
 """
 
-from __future__ import division, print_function     # problemlose Division
-import numpy as np                                  # Arrays, Mathe etc
-import matplotlib.pyplot as plt                     # Plotten
-import matplotlib as mpl                            # MPL
-import warnings                                     # Warnungs-Handler
+import matplotlib as mpl  # MPL
+import matplotlib.pyplot as plt  # Plotten
+import numpy as np  # Arrays, Mathe etc
 
 
 def gausskurve_v(x_punkte, ew, vari):
@@ -22,7 +20,7 @@ def gausskurve_v(x_punkte, ew, vari):
     """
     # Normalisierungsfaktor auf Integral=Eins:
     norm = np.sqrt(0.5 / np.pi / vari)
-    return np.exp(-0.5 * (x_punkte - ew)**2 / vari) * norm
+    return np.exp(-0.5 * (x_punkte - ew) ** 2 / vari) * norm
 
 
 class Aufgabe_Neun(object):
@@ -53,8 +51,21 @@ class Aufgabe_Neun(object):
         _darstellung(self, zeit): Wertet self.zustaende zu aktueller Zeit aus.
     """
 
-    def __init__(self, x0, vdrift, diffusion, pos_xabs, iteilchen, tmax, axes,
-                 dt=.01, binbreite=0.5, xlim=[-25, 20], seed=None, numz=250):
+    def __init__(
+        self,
+        x0,
+        vdrift,
+        diffusion,
+        pos_xabs,
+        iteilchen,
+        tmax,
+        axes,
+        dt=0.01,
+        binbreite=0.5,
+        xlim=[-25, 20],
+        seed=None,
+        numz=250,
+    ):
         """Initialisiert Parameter. Konsolenausgabe der Variablenwerte.
         x0 : reelle Zahl, x(t=0) der Teilchen.
         vdrift: reelle Zahl, Driftgeschwindigkeit.
@@ -76,39 +87,51 @@ class Aufgabe_Neun(object):
         self.x0 = float(x0)
         self.xabs = float(pos_xabs)
         if self.x0 > self.xabs:
-            err_text = ("OBdA soll der absorbierende Rand 'rechts' von "
-                        "der Startposition x0 liegen!")
+            err_text = (
+                "OBdA soll der absorbierende Rand 'rechts' von "
+                "der Startposition x0 liegen!"
+            )
             raise ValueError(err_text)
         self.vdrift = float(vdrift)
         self.diffusion = float(diffusion)
         self.nt0 = int(iteilchen)
         if self.nt0 <= 1:
-            err_text = ("Anzahl iteilchen = {} muss zur Auswertung "
-                        ">=1 sein!").format(self.nt0)
+            err_text = (
+                "Anzahl iteilchen = {} muss zur Auswertung " ">=1 sein!"
+            ).format(self.nt0)
             raise ValueError(err_text)
         self.tmax = int(tmax)
         assert self.tmax > 0
-        self.set_axes(axes)                     # Zeichenbereiche.
-        self.set_dt(dt)                         # dt und Rechenschritte.
+        self.set_axes(axes)  # Zeichenbereiche.
+        self.set_dt(dt)  # dt und Rechenschritte.
         self.x_min = min(xlim)
         self.x_max = max(xlim)
-        assert self.x_min < self.x_max          # Zeichenbereich groesser 0.
+        assert self.x_min < self.x_max  # Zeichenbereich groesser 0.
         self.binb = binbreite
-        assert self.binb > 0                    # Binbreite groesser 0.
-        self.seed = seed                        # np.random seed
+        assert self.binb > 0  # Binbreite groesser 0.
+        self.seed = seed  # np.random seed
 
         print("Initialisierung mit Parametern:")
-        print("x0= {}, xa= {}, vdrift= {}, diffusion= {},tmax= {}, dt= 1/{}"
-              "\n{} Realisierungen.".format(self.x0, self.xabs, self.vdrift,
-                                            self.diffusion, self.tmax, self.rechensteps, self.nt0))
+        print(
+            "x0= {}, xa= {}, vdrift= {}, diffusion= {},tmax= {}, dt= 1/{}"
+            "\n{} Realisierungen.".format(
+                self.x0,
+                self.xabs,
+                self.vdrift,
+                self.diffusion,
+                self.tmax,
+                self.rechensteps,
+                self.nt0,
+            )
+        )
 
-        self.startnum = 0                       # Gestartete Ensembles
-        self.ew_min = -1                        # Vorbelegung Zeichenparameter
+        self.startnum = 0  # Gestartete Ensembles
+        self.ew_min = -1  # Vorbelegung Zeichenparameter
         self.ew_max = 1
         self.var_max = 10
         # Vorbereitete Farbe fuer Absor.
-        self.cabs = 'red'
-        self.ls_t = 'b-'                        # Vorb. Linestyle der th. Kurven
+        self.cabs = "red"
+        self.ls_t = "b-"  # Vorb. Linestyle der th. Kurven
         print("\nRote Werte: Messungen an Ensemble mit Absorption.")
         print("Blaue Werte: Theoretische Kurven von Ensemble ohne Absorption.")
         self.pause = False
@@ -118,28 +141,28 @@ class Aufgabe_Neun(object):
 
     def __call__(self):
         """Vorgefertigte Interaktion mit vorbereiteten Parametern."""
-        if self.seed is not None:       # random.seed fuer Reproduzierbarkeit.
+        if self.seed is not None:  # random.seed fuer Reproduzierbarkeit.
             np.random.seed(self.seed)
             print("Pseudo-Zufallszahlen mit seed={}.".format(self.seed))
         self._plotumgebung()
         figc = self.ax_hist.get_figure()
-        figc.canvas.mpl_connect('button_press_event', self._klick)
+        figc.canvas.mpl_connect("button_press_event", self._klick)
 
     def set_axes(self, axes):
         """Setze self.axes. Kontrolliert auf korrekte Anzahl.
         Setzt benoetigte Achsenbereiche zurueck auf Default-Einstellungen.
         """
-        self.axes = axes.flatten()[:4]      # Nutze axes[0...3]
+        self.axes = axes.flatten()[:4]  # Nutze axes[0...3]
         if len(self.axes) < 4:
             raise ValueError("`self.axes` braucht 4 Bereiche.")
-        [a.cla() for a in self.axes]        # Bereiche aufraeumen.
-        self.ax_hist = self.axes[0]         # Benennung.
+        [a.cla() for a in self.axes]  # Bereiche aufraeumen.
+        self.ax_hist = self.axes[0]  # Benennung.
         self.ax_norm = self.axes[1]
         self.ax_ew = self.axes[2]
         self.ax_var = self.axes[3]
 
     def set_dt(self, dt):
-        """Setze self.rechensteps und self.dt=1/self.rechensteps. """
+        """Setze self.rechensteps und self.dt=1/self.rechensteps."""
         self.rechensteps = int(np.ceil(1 / dt))  # Aufrunden um 0 zu vermeiden.
         self.dt = 1 / self.rechensteps
 
@@ -150,8 +173,8 @@ class Aufgabe_Neun(object):
         Nutzt : self.vdrift, self.diffusion, self.dt
         Rueckgabe : einmal-iterierte Position aller Teilchen aus `xt`.
         """
-        di = (2.*self.diffusion*self.dt)**0.5 * np.random.normal(size=len(xt))
-        xtplus = xt + self.vdrift*self.dt + di
+        di = (2.0 * self.diffusion * self.dt) ** 0.5 * np.random.normal(size=len(xt))
+        xtplus = xt + self.vdrift * self.dt + di
         return xtplus
 
     def show(self):
@@ -163,20 +186,20 @@ class Aufgabe_Neun(object):
         Behandelte Achsen: self.ax_hist, self.ax_norm, self.ax_ew, self.ax_var.
         """
         # Achsenbereiche
-        self.ax_hist.axis([self.x_min, self.x_max, 0., 0.25])
-        self.ax_norm.axis([0., self.tmax, 0., 1.1])
-        self.ax_ew.axis([0., self.tmax, self.ew_min, self.ew_max])
-        self.ax_var.axis([0., self.tmax, 0, self.var_max])
+        self.ax_hist.axis([self.x_min, self.x_max, 0.0, 0.25])
+        self.ax_norm.axis([0.0, self.tmax, 0.0, 1.1])
+        self.ax_ew.axis([0.0, self.tmax, self.ew_min, self.ew_max])
+        self.ax_var.axis([0.0, self.tmax, 0, self.var_max])
 
         # Linie Gauss mit Drift und Diffusion
-        self.line_gd, = self.ax_hist.plot([], [], self.ls_t, alpha=0.7)
-        self.line_gd.set_data(self.x_gd, np.nan*np.ones_like(self.x_gd))
+        (self.line_gd,) = self.ax_hist.plot([], [], self.ls_t, alpha=0.7)
+        self.line_gd.set_data(self.x_gd, np.nan * np.ones_like(self.x_gd))
         # Linie Gauss + Absorption
-        self.line_gda, = self.ax_hist.plot([], [], c='g', lw=2)
-        self.line_gda.set_data(self.x_gda, np.nan*np.ones_like(self.x_gda))
+        (self.line_gda,) = self.ax_hist.plot([], [], c="g", lw=2)
+        self.line_gda.set_data(self.x_gda, np.nan * np.ones_like(self.x_gda))
         # Label
-        self.ax_hist.set_xlabel("$Position\ im\ Raum$")
-        self.ax_hist.set_ylabel("$Normierte\ Dichte\ der\ Teilchen$")
+        self.ax_hist.set_xlabel(r"$Position\ im\ Raum$")
+        self.ax_hist.set_ylabel(r"$Normierte\ Dichte\ der\ Teilchen$")
         self.ax_norm.set_xlabel("$Zeit$")
         self.ax_norm.set_ylabel("$Norm$")
         self.ax_ew.set_xlabel("$Zeit$")
@@ -184,13 +207,12 @@ class Aufgabe_Neun(object):
         self.ax_var.set_xlabel("$Zeit$")
         self.ax_var.set_ylabel("$Varianz$")
         # Markierungen
-        self.ax_hist.axvline(self.x0, linewidth=0.6, c='black', ls="--")
+        self.ax_hist.axvline(self.x0, linewidth=0.6, c="black", ls="--")
         self.ax_hist.axvline(self.xabs, linewidth=2, c=self.cabs, ls=":")
         # Text
         title = r"$Darstellung\ \ Ortsverteilung$"
         self.ax_hist.set_title(title, fontsize=18, y=1.03)
-        self.ax_norm.set_title(
-            "-> Mausklick startet Ensemble an x0 <-", y=1.03)
+        self.ax_norm.set_title("-> Mausklick startet Ensemble an x0 <-", y=1.03)
 
     def _klick(self, event):
         """Klick-Handler fuer Interaktion mit `self.axes`.
@@ -201,19 +223,20 @@ class Aufgabe_Neun(object):
         """
         # Test ob Funktionen des Plotfensters deaktiviert sind:
         mode = plt.get_current_fig_manager().toolbar.mode
-        if not (mode == '' and event.inaxes in self.axes):
+        if not (mode == "" and event.inaxes in self.axes):
             return
         if event.button == 3 and self.plot_aktiv:  # Pause
-            self.pause = not self.pause             # Aendere Pausenstatus.
+            self.pause = not self.pause  # Aendere Pausenstatus.
             if not self.pause:
                 print("Berechung fortgesetzt.")
                 return
-            print("Berechnung durch Benutzer pausiert "
-                  "- Fortsetzen durch Rechtsklick.")
+            print(
+                "Berechnung durch Benutzer pausiert " "- Fortsetzen durch Rechtsklick."
+            )
             while self.pause:
                 plt.pause(0.1)
             return
-        if event.button == 1 and not self.pause:       # Berechnung Starten.
+        if event.button == 1 and not self.pause:  # Berechnung Starten.
             self._plot_handler()
 
     def _plot_handler(self):
@@ -221,12 +244,15 @@ class Aufgabe_Neun(object):
         self.plot_aktiv = True
         ret = self._zeitentwicklung()
         self.plot_aktiv = False
-        if ret[0] == 0:      # Normaler Ablauf
-            print("[{}]: Berechnung ist beendet.".format(ret[1]),
-                  "Teilchen zu Tmax:", len(self.zustaende))
-        elif ret[0] == 1:    # Abgebrochen vor tmax
+        if ret[0] == 0:  # Normaler Ablauf
+            print(
+                "[{}]: Berechnung ist beendet.".format(ret[1]),
+                "Teilchen zu Tmax:",
+                len(self.zustaende),
+            )
+        elif ret[0] == 1:  # Abgebrochen vor tmax
             print("[{}]: Berechnung unterbrochen.".format(ret[1]))
-        elif ret[0] == 2:    # Ein frueher gestartetes Ensemble unterdrueckt."
+        elif ret[0] == 2:  # Ein frueher gestartetes Ensemble unterdrueckt."
             print("[{}]: Alte Berechnung unterdrueckt.".format(ret[1]))
 
     def _zeitentwicklung(self):
@@ -243,36 +269,37 @@ class Aufgabe_Neun(object):
         startnum = self.startnum
         print("[{}]: Starte Ensemble".format(startnum))
         # Bereinige Statistik-Parameter vorheriger Darstellung
-        del self.ax_norm.lines[:]
-        del self.ax_ew.lines[:]
-        del self.ax_var.lines[:]
-        self.line_normt, = self.ax_norm.plot([], [], self.ls_t)
-        self.line_ewt, = self.ax_ew.plot([], [], self.ls_t)
-        self.line_vart, = self.ax_var.plot([], [], self.ls_t)
+        [line.remove() for line in self.ax_norm.lines]
+        [line.remove() for line in self.ax_ew.lines]
+        [line.remove() for line in self.ax_var.lines]
+        (self.line_normt,) = self.ax_norm.plot([], [], self.ls_t)
+        (self.line_ewt,) = self.ax_ew.plot([], [], self.ls_t)
+        (self.line_vart,) = self.ax_var.plot([], [], self.ls_t)
 
-        self.zustaende = self.x0*np.ones(self.nt0)  # Startpositionen
-        for i in range(self.tmax):                  # Zeitschleife
+        self.zustaende = self.x0 * np.ones(self.nt0)  # Startpositionen
+        for i in range(self.tmax):  # Zeitschleife
             # Neue Orte
-            for j in range(self.rechensteps):       # Zeitschritte umsetzen
+            for j in range(self.rechensteps):  # Zeitschritte umsetzen
                 # Nicht-Nachholen bei Unterbrechung.
                 if startnum < self.startnum:
                     return (2, startnum)
                 zustaende = self.ort_iteration(self.zustaende)
                 self.zustaende = zustaende[zustaende < self.xabs]
             # Ausnahme
-            if len(self.zustaende) <= 1:              # Keine Statistik moeglich
-                print("Warnung: Nur {} Teilchen zu t={} uebrig!"
-                      "".format(len(self.zustaende), i+1)
-                      )
-                self.ax_hist.patches = []           # Histogramm leeren.
+            if len(self.zustaende) <= 1:  # Keine Statistik moeglich
+                print(
+                    "Warnung: Nur {} Teilchen zu t={} uebrig!"
+                    "".format(len(self.zustaende), i + 1)
+                )
+                self.ax_hist.patches = []  # Histogramm leeren.
                 self.line_gd.set_ydata(0)
                 self.line_gda.set_ydata(0)
                 plt.pause(0.01)
                 return (1, startnum)
             # Zeichnen
-            self._darstellung(zeit=i+1)             # Graphische Darstellungen.
+            self._darstellung(zeit=i + 1)  # Graphische Darstellungen.
             plt.pause(0.01)
-        return (0, startnum)                        # Zeitdurchlauf beendet.
+        return (0, startnum)  # Zeitdurchlauf beendet.
 
     def _darstellung(self, zeit):
         """Wertet `self.zustaende` zu aktueller Zeit aus.
@@ -289,11 +316,11 @@ class Aufgabe_Neun(object):
         """
         laenge = len(self.zustaende)
         # Betrachtete Groessen und theoretischer Wert an t=`zeit`.
-        norm, norm_t = (laenge / self.nt0, 1.)
+        norm = laenge / self.nt0
         erw = np.mean(self.zustaende)
-        erw_t = self.x0 + self.vdrift*zeit
-        vari = np.var(self.zustaende, ddof=1)       # N-1, da EW experimentell.
-        vari_t = 2. * self.diffusion*zeit
+        erw_t = self.x0 + self.vdrift * zeit
+        vari = np.var(self.zustaende, ddof=1)  # N-1, da EW experimentell.
+        vari_t = 2.0 * self.diffusion * zeit
         # Plotbereich aktualisieren
         if self.var_max < max(vari, vari_t):
             self.var_max = max(vari, vari_t)
@@ -301,8 +328,8 @@ class Aufgabe_Neun(object):
             self.ew_max = max(erw, erw_t)
         if self.ew_min > min(erw, erw_t):
             self.ew_min = min(erw, erw_t)
-        self.ax_var.set_ybound(upper=self.var_max+1)
-        self.ax_ew.set_ybound(lower=self.ew_min-1, upper=self.ew_max+1)
+        self.ax_var.set_ybound(upper=self.var_max + 1)
+        self.ax_ew.set_ybound(lower=self.ew_min - 1, upper=self.ew_max + 1)
         # Verteilungsparameter und erwarteten Grenzwert zeichnen.
         self.ax_norm.plot(zeit, norm, ".", c=self.cabs)
         self.line_normt.set_data([0, zeit], [1, 1])
@@ -312,13 +339,14 @@ class Aufgabe_Neun(object):
         self.line_vart.set_data([0, zeit], [0, vari_t])
         # Erstelle y-Werte der Theorie-Kurven P(x).
         kurve_D = gausskurve_v(self.x_gd, erw_t, vari_t)
-        ew_spiegel = 2*self.xabs - self.x0 + self.vdrift*zeit
-        kurve_DA = (gausskurve_v(self.x_gda, erw_t, vari_t)
-                    - gausskurve_v(self.x_gda, ew_spiegel, vari_t)
-                    * gausskurve_v(self.xabs, erw_t, vari_t)
-                    / gausskurve_v(self.xabs, ew_spiegel, vari_t))
+        ew_spiegel = 2 * self.xabs - self.x0 + self.vdrift * zeit
+        kurve_DA = gausskurve_v(self.x_gda, erw_t, vari_t) - gausskurve_v(
+            self.x_gda, ew_spiegel, vari_t
+        ) * gausskurve_v(self.xabs, erw_t, vari_t) / gausskurve_v(
+            self.xabs, ew_spiegel, vari_t
+        )
 
-        self.line_gd.set_ydata(kurve_D)             # Setze neue Theorie-Vert.
+        self.line_gd.set_ydata(kurve_D)  # Setze neue Theorie-Vert.
         self.line_gda.set_ydata(kurve_DA)
 
         # Bestimmung Bin-Parameter.
@@ -327,9 +355,15 @@ class Aufgabe_Neun(object):
         dbin = span / self.akt_bins
         weights = np.ones(laenge) / self.nt0 / dbin
         # Das Histogramm der Orte.
-        self.ax_hist.clear()                   # Histogramm zuruecksetzen
-        self.ax_hist.hist(self.zustaende, int(self.akt_bins), facecolor='green',
-                          alpha=0.5, weights=weights)
+        # Histogramm zuruecksetzen
+        [p.remove() for p in self.ax_hist.patches]
+        self.ax_hist.hist(
+            self.zustaende,
+            int(self.akt_bins),
+            facecolor="green",
+            alpha=0.5,
+            weights=weights,
+        )
 
 
 def main():
@@ -338,32 +372,31 @@ def main():
     Unterdruecke `mplDeprecation` waehrend Durchlauf.
     Dies hat hier nur Einfluss auf die Konsolenausgabe des Programmes.
     """
-    warnings.filterwarnings("ignore", category=mpl.cbook.mplDeprecation)
-    mpl.rcParams.update({'axes.labelsize': 14, "axes.labelpad": 3.0})
-    print(__doc__)                              # Anfangstext Konsole
+    mpl.rcParams.update({"axes.labelsize": 14, "axes.labelpad": 3.0})
+    print(__doc__)  # Anfangstext Konsole
 
     # Bewegung
-    x0 = -5                                     # Startposition der Teilchen
-    vdrift = 0.2                                # Driftgeschwindigkeit
-    diffusion = 1.5                             # Diffusionskonstante
-    pos_xabs = 15                               # Position absorbierender Rand
+    x0 = -5  # Startposition der Teilchen
+    vdrift = 0.2  # Driftgeschwindigkeit
+    diffusion = 1.5  # Diffusionskonstante
+    pos_xabs = 15  # Position absorbierender Rand
     # Numerik : Anzahl Realisierungen, maximale Zeit und Zeit fuer Rechenschritt
     R = 10**4
     tmax = 80
     dt = 0.01
     # Zeichenbereich
     fig, axes = plt.subplots(2, 2, figsize=(14, 8))
-    fig.subplots_adjust(left=0.08, bottom=0.08, right=0.95, top=0.93,
-                        wspace=0.16, hspace=0.23)
+    fig.subplots_adjust(
+        left=0.08, bottom=0.08, right=0.95, top=0.93, wspace=0.16, hspace=0.23
+    )
     # Instanziierung von `Aufgabe_Neun` mit obigen Parametern.
     Rea = Aufgabe_Neun(x0, vdrift, diffusion, pos_xabs, R, tmax, axes, dt)
-    Rea()                                       # Starten der Darstellung
-    Rea.show()                                  # Anzeigen der Plots
+    Rea()  # Starten der Darstellung
+    Rea.show()  # Anzeigen der Plots
 
 
-# -------------Main Programm----------------
 if __name__ == "__main__":
-    main()                                      # Rufe Mainroutine
+    main()
 
 """Kommentar:
 a) Absorbierender Rand
