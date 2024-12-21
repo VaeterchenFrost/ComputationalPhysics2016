@@ -21,10 +21,10 @@ class Histogramm(object)
     Stellt Methoden zeichnen, zeichnen_gauss.
 """
 
-from __future__ import division, print_function  # problemlose Division
-import numpy as np                              # Arrays, Mathe etc
-import matplotlib.pyplot as plt                 # Plotten
-from functools import partial                   # Vorbelegung args.
+from functools import partial  # Vorbelegung args.
+
+import matplotlib.pyplot as plt  # Plotten
+import numpy as np  # Arrays, Mathe etc
 
 
 def gausskurve(x, ew, stdabw):
@@ -38,7 +38,7 @@ def gausskurve(x, ew, stdabw):
     """
     # Normalisierungsfaktor auf Eins:
     norm = stdabw * np.sqrt(2 * np.pi)
-    arg = -0.5 * ((x - ew) / stdabw)**2
+    arg = -0.5 * ((x - ew) / stdabw) ** 2
     return np.exp(arg) / norm
 
 
@@ -64,8 +64,9 @@ class IdealesGasEnsemble(object):
             err_text = "Anzahl N = {} muss positiv sein!".format(self.N)
             raise ValueError(err_text)
         if R <= 1:
-            err_text = ("Anzahl R = {} muss zur Auswertung groesser als 1 "
-                        "sein!").format(self.R)
+            err_text = (
+                "Anzahl R = {} muss zur Auswertung groesser als 1 " "sein!"
+            ).format(self.R)
             raise ValueError(err_text)
 
         print("N = {}; R = {}; dt = {}".format(self.N, self.R, self.dt))
@@ -78,10 +79,10 @@ class IdealesGasEnsemble(object):
         Instanziierung jeweils einer Realisierung fuer jeden Druck.
         """
         self.druck = np.zeros(self.R)
-        rea = Realisierung(self.N, self.dt)         # Realisierung erstellen
+        rea = Realisierung(self.N, self.dt)  # Realisierung erstellen
         for i in range(self.R):
             if i:
-                rea.set_start()                   # Neue Startwerte
+                rea.set_start()  # Neue Startwerte
             # Druck berechnen
             rea.berechne_druck()
             # Den Druck pA abspeichern
@@ -107,9 +108,9 @@ class Realisierung(object):
         self.v0 = np.random.normal(size=self.N)
         """
         # Return random floats in the half-open interval [0.0, 1.0).
-        self.x0 = np.random.ranf(size=self.N)       # Startorte
+        self.x0 = np.random.ranf(size=self.N)  # Startorte
         # Draw random samples from a normal (Gaussian) distribution.
-        self.v0 = np.random.normal(size=self.N)     # Startgeschwindigkeiten
+        self.v0 = np.random.normal(size=self.N)  # Startgeschwindigkeiten
 
     def berechne_druck(self):
         """Druck gegen rechte Wand im einheitenlosen Quader nach analytischer
@@ -117,7 +118,7 @@ class Realisierung(object):
         pA = 2/N/dt * Sum_1^N (Abs(vi) * ni)
         """
         self.stoesse = self.reflexionen()
-        self.pA = 2/self.N/self.dt * np.dot(abs(self.v0), self.stoesse)
+        self.pA = 2 / self.N / self.dt * np.dot(abs(self.v0), self.stoesse)
 
     def reflexionen(self, ort=None):
         """Funktion die fuer alle N Teilchen die Zahl der Reflexionen an
@@ -140,11 +141,11 @@ class Realisierung(object):
         """
         if ort is None:
             # Teilchen nach Zeit t fortbewegt mit jeweiliger Geschwindigkeit v.
-            ort = self.x0 + self.dt*self.v0
+            ort = self.x0 + self.dt * self.v0
         # Abbildung auf vollstaendige Bahnen und positive Werte der Reflektionen
         n = abs(np.trunc(ort))
         # Aufrunden der Healfte -> Nur Stoesse mit rechter Wand zaehlen.
-        n = np.ceil(n/2)
+        n = np.ceil(n / 2)
         return n
 
 
@@ -168,9 +169,9 @@ class Histogramm(object):
         num_bins : Natuerliche Zahl, Anzahl der Balken im Histogramm
         figsize : Tupel (Breite, Hoehe) der gewuenschten Fenstergroesse
         """
-        self.ax = axis                              # Zeichenachse
-        self.yarr = daten                           # Array der Daten
-        self.num_bins = num_bins                    # Anzahl Bins
+        self.ax = axis  # Zeichenachse
+        self.yarr = daten  # Array der Daten
+        self.num_bins = num_bins  # Anzahl Bins
 
     def zeichnen(self):
         """Zeichnet normiertes Histogramm der Daten auf eigene Achse.
@@ -178,24 +179,27 @@ class Histogramm(object):
         Erzeugt: self.bins, self.title
         """
         # Das Histogramm der Daten
-        werte, self.bins = self.ax.hist(self.yarr, self.num_bins,
-                                        density=True, facecolor='green', alpha=0.5)[:2]
+        werte, self.bins = self.ax.hist(
+            self.yarr, self.num_bins, density=True, facecolor="green", alpha=0.5
+        )[:2]
         bin_breite = self.bins[1] - self.bins[0]
         # Titel
         self.title = "$Das\ Histogramm\ des\ Druckes\ p_A\
-        \qquad Binbreite\ =\ {0:.5f}$".format(bin_breite)
+        \qquad Binbreite\ =\ {0:.5f}$".format(
+            bin_breite
+        )
         # Beschriftung
         self.ax.set_title(self.title, fontsize=24, y=1.02)
-        self.ax.set_xlabel("$Druck$"" p", fontsize=22)
+        self.ax.set_xlabel("$Druck$" " p", fontsize=22)
         self.ax.set_ylabel(r"$Normierte\ H\"{a}ufigkeitsdichte$", fontsize=22)
 
-    def zeichnen_gauss(self, gauss):                # 'Gaussglocke'
+    def zeichnen_gauss(self, gauss):  # 'Gaussglocke'
         """Plottet mitgegebene Funktion `gauss` auf eigene Achse.
         Parameter:
             gauss: function, einzig abhaengig von erstem! Parameter.
         """
         try:
-            self.ax.plot(self.bins, gauss(self.bins), 'm--', lw=1.5)
+            self.ax.plot(self.bins, gauss(self.bins), "m--", lw=1.5)
         except AttributeError:
             print("Zuvor wird Zeichenmethode self.zeichnen() benoetigt!")
             raise
@@ -209,14 +213,17 @@ def main():
     """Mainfunktion Druckmessung Ideales Gas.
     Eingabe der Parameter und Starten gewuenschter Realisierungen.
     """
-    benutzerfuehrung = ("Computational Physics Aufgabe 8.1,  "
-                        "Autor: Martin Roebke 19.06.16\n"
-                        "Bestimmung des mittleren Druckes in Zeitintervall dt, \n"
-                        "der auf Seitenflaeche A eines Quaders von N Teilchen ausgeuebt wird.\n"
-                        "Darstellung von Ensemble mit R Realisierungen als normiertes Histogramm.\n"
-                        "Erwartungswert und Standardabweichung des Ensembles werden berechnet,\n"
-                        "in Konsole ausgegeben. In das Histogramm wird die korrespondierende \n"
-                        "Gausskurve gezeichnet." "\n")
+    benutzerfuehrung = (
+        "Computational Physics Aufgabe 8.1,  "
+        "Autor: Martin Roebke 19.06.16\n"
+        "Bestimmung des mittleren Druckes in Zeitintervall dt, \n"
+        "der auf Seitenflaeche A eines Quaders von N Teilchen ausgeuebt wird.\n"
+        "Darstellung von Ensemble mit R Realisierungen als normiertes Histogramm.\n"
+        "Erwartungswert und Standardabweichung des Ensembles werden berechnet,\n"
+        "in Konsole ausgegeben. In das Histogramm wird die korrespondierende \n"
+        "Gausskurve gezeichnet."
+        "\n"
+    )
 
     print(benutzerfuehrung)
 
@@ -248,12 +255,11 @@ def main():
     print("Standardabweichung = ", std_abweichung)
     print("Anzahl Bins: ", histogramm.num_bins)
 
-    histogramm.show()                               # Benutzerinteraktion
+    histogramm.show()  # Benutzerinteraktion
 
 
-# -------------Main Programm----------------
 if __name__ == "__main__":
-    main()                                          # Rufe Mainroutine
+    main()
 
 """Kommentar:
 Einfluss delta t: Bei ganz kleinen Werten -> Alle Null Reflexionen.
