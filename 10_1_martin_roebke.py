@@ -6,11 +6,10 @@ In rechtem Plot-Bereich wird die mittlere Magnetisierung `m`
 ueber der dimensionslosen Temperatur tau=k_b*T/J gezeichnet.
 """
 
-from __future__ import division, print_function     # problemlose Division
-import numpy as np                                  # Arrays, Mathe etc
-import matplotlib.pyplot as plt                     # Plotten
-from matplotlib import cbook
 from warnings import filterwarnings
+
+import matplotlib.pyplot as plt  # Plotten
+import numpy as np  # Arrays, Mathe etc
 
 
 def isIncreasing(l):
@@ -35,7 +34,7 @@ class SpinKonfig(object):
         wk_spinflip(self, x, y): Wahrscheinlichkeit fuer Spinflip an (x, y).
     """
 
-    def __init__(self, n, tau=0., m0=1.):
+    def __init__(self, n, tau=0.0, m0=1.0):
         """Initialisiere Parameter.
         tau : Nichtnegative Zahl, Dimensionslose Temperatur.
         m0 : Angestrebte mittlere Magnetisierung [-1, 1].
@@ -49,48 +48,49 @@ class SpinKonfig(object):
          self.m : None.
             Genutzt fuer aktuelle Mittlere Magnetisierung der Spins.
         """
-        self.dH = 2 * np.linspace(-4, 4, 5)         # [-8., -4., 0., 4., 8.]
-        self.n = int(n)                             # Gitterlaenge; N=n*n
+        self.dH = 2 * np.linspace(-4, 4, 5)  # [-8., -4., 0., 4., 8.]
+        self.n = int(n)  # Gitterlaenge; N=n*n
         assert self.n > 0
         self.tau = float(tau)
-        assert self.tau >= 0                        # Konsistenz tau >= 0
+        assert self.tau >= 0  # Konsistenz tau >= 0
         m0 = float(m0)
-        assert abs(m0) <= 1                          # Konsistenz m0 [-1, 1]
+        assert abs(m0) <= 1  # Konsistenz m0 [-1, 1]
         self.s_arr = self.erstelle_spins(m0)
-        self.setze_m()                              # Aktualisiere `self.m`
-        self.setze_arwk()                           # Aktualisiere `self.arwk`
-        print("SpinKonfig initialisiert mit: tau = {:.3f}, m = {:.3f}"
-              "".format(self.tau, self.m))
+        self.setze_m()  # Aktualisiere `self.m`
+        self.setze_arwk()  # Aktualisiere `self.arwk`
+        print(
+            "SpinKonfig initialisiert mit: tau = {:.3f}, m = {:.3f}"
+            "".format(self.tau, self.m)
+        )
 
     def neue_konfig(self, tau, m0):
         """Konfiguriere Spingitter mit diml. Temperatur tau und 'm' moeglichst
         nahe an m0. Aktualisiere self.m, self.arwk.
         """
         m0 = float(m0)
-        assert not abs(m0) > 1                      # Konsistenz m0 [-1, 1]
+        assert not abs(m0) > 1  # Konsistenz m0 [-1, 1]
         self.tau = float(tau)
-        assert not self.tau < 0                     # Konsistenz tau >= 0
+        assert not self.tau < 0  # Konsistenz tau >= 0
         self.s_arr = self.erstelle_spins(m0)
-        self.setze_m()                              # Aktualisiere `self.m`
-        print("Aktualisiere auf tau = {:.3f}, m = {:.3f}".format(self.tau,
-                                                                 self.m))
-        self.setze_arwk()                           # Aktualisiere `self.arwk`
+        self.setze_m()  # Aktualisiere `self.m`
+        print("Aktualisiere auf tau = {:.3f}, m = {:.3f}".format(self.tau, self.m))
+        self.setze_arwk()  # Aktualisiere `self.arwk`
 
     def erstelle_spins(self, m0):
         """Erstelle 2D Array self.n*self.n mit moeglichst guter Darstellung der
         mittleren Magnetisierung `m0`.
         """
-        anz_neg = int(round(self.n*self.n * (1 - m0)/2))
-        arhilf = np.ones(self.n*self.n, dtype=np.int8)
-        arhilf[range(anz_neg)] = -1                # Negative Spins
-        if anz_neg > 0 and anz_neg < self.n*self.n:
+        anz_neg = int(round(self.n * self.n * (1 - m0) / 2))
+        arhilf = np.ones(self.n * self.n, dtype=np.int8)
+        arhilf[range(anz_neg)] = -1  # Negative Spins
+        if anz_neg > 0 and anz_neg < self.n * self.n:
             # Wenn verschiedene Spins in System:
             np.random.shuffle(arhilf)  # in-place schuetteln
-        return np.reshape(arhilf, (self.n, self.n))   # Rueckgabe 2D Array.
+        return np.reshape(arhilf, (self.n, self.n))  # Rueckgabe 2D Array.
 
     def setze_m(self):
         """Mittlere Magnetisierung auf Gitter = Summe Spins / Anzahl Spins."""
-        self.m = np.sum(self.s_arr)/self.n/self.n
+        self.m = np.sum(self.s_arr) / self.n / self.n
 
     def setze_arwk(self, gefroren=0.05):
         """Nach Neusetzen von `self.tau` die Flip-Wahrscheinlichkeiten
@@ -100,12 +100,12 @@ class SpinKonfig(object):
         Dies ist numerisch hier gleich [1,1,1,0,0] zu setzen.
         Sonst Gefahr bei sehr kleinen tau: overflows/unnoetige Numerik.
         """
-        if self.tau <= gefroren:                    # Eingefroren
-            self.arwk = np.zeros_like(self.dH)      # Zahlt Energie -> 0.
-            self.arwk[self.dH <= 0] = 1.            # Verringert Energie -> 1.
+        if self.tau <= gefroren:  # Eingefroren
+            self.arwk = np.zeros_like(self.dH)  # Zahlt Energie -> 0.
+            self.arwk[self.dH <= 0] = 1.0  # Verringert Energie -> 1.
         else:
-            self.arwk = np.exp(-self.dH/self.tau)
-            self.arwk[self.arwk > 1] = 1.
+            self.arwk = np.exp(-self.dH / self.tau)
+            self.arwk[self.arwk > 1] = 1.0
 
     def flip(self, x, y):
         """Drehe Spin an Stelle (x, y) um."""
@@ -115,10 +115,10 @@ class SpinKonfig(object):
         """Berechnung Wk fuer potentiellen Spinflip an (i, j) fuer
         Periodische Randbedingung und naechste Nachbarn Wechselwirkung.
         """
-        r = self.s_arr[x, (y+1) % self.n]
-        l = self.s_arr[x, (y-1) % self.n]
-        o = self.s_arr[(x+1) % self.n, y]
-        u = self.s_arr[(x-1) % self.n, y]
+        r = self.s_arr[x, (y + 1) % self.n]
+        l = self.s_arr[x, (y - 1) % self.n]
+        o = self.s_arr[(x + 1) % self.n, y]
+        u = self.s_arr[(x - 1) % self.n, y]
         dH = 2 * self.s_arr[x, y] * (r + l + o + u)
         # Auf gleiche Indizes gelegt.
         return self.arwk[self.dH == dH]
@@ -150,8 +150,8 @@ class IsingModell(object):
         Setzt `self.maxtau` als groesstes zu zeichnendes tau.
         Initialisiert Schalter `self.plot_aktiv`, True: Rechnung laeuft.
         """
-        self.axspin = axspin                        # Plotbereich Spins
-        self.axpha = axpha                          # Plotbereich m von tau
+        self.axspin = axspin  # Plotbereich Spins
+        self.axpha = axpha  # Plotbereich m von tau
         self.n = int(n)
         assert self.n > 0
         self.mc_steps = int(mc_steps)
@@ -164,94 +164,97 @@ class IsingModell(object):
         self.Spins = SpinKonfig(self.n)
         if setup:
             self.plotumgebung()
-        print("\nSchwarze Bereiche : Spin '+1' / Weisse Bereiche : Spin '-1'."
-              "\nRote Linien : Mittlere Magnetisierung im thermod. Limes."
-              "\nSchwarzer Punkt rechts: Zeigt aktuelle m[tau] "
-              "der Spinkonfiguration.\n::Bei Linksklick auf:"
-              "\n:: Spins : Starte '{}' Monte-Carlo-Zeitschritte."
-              "\n:: m[tau]-Plot : Initialisiere Spins mit 'm' und 'tau'."
-              "\n".format(self.mc_steps))
+        print(
+            "\nSchwarze Bereiche : Spin '+1' / Weisse Bereiche : Spin '-1'."
+            "\nRote Linien : Mittlere Magnetisierung im thermod. Limes."
+            "\nSchwarzer Punkt rechts: Zeigt aktuelle m[tau] "
+            "der Spinkonfiguration.\n::Bei Linksklick auf:"
+            "\n:: Spins : Starte '{}' Monte-Carlo-Zeitschritte."
+            "\n:: m[tau]-Plot : Initialisiere Spins mit 'm' und 'tau'."
+            "\n".format(self.mc_steps)
+        )
 
     def __call__(self, tau_s, m_s):
         """Starte Darstellung; Erster Startpunkt auf m ~ m_s, tau ~ tau_s."""
-        self.Spins.neue_konfig(tau_s, m_s)          # Aufruf mit Startwert
-        self.imh = self.axspin.imshow(self.Spins.s_arr, interpolation="none",
-                                      cmap=plt.get_cmap('Greys'))
-        self.pointer.set_data(self.Spins.tau, self.Spins.m)
+        self.Spins.neue_konfig(tau_s, m_s)  # Aufruf mit Startwert
+        self.imh = self.axspin.imshow(
+            self.Spins.s_arr, interpolation="none", cmap=plt.get_cmap("Greys")
+        )
+        self.pointer.set_data([self.Spins.tau], [self.Spins.m])
 
     def plotumgebung(self):
         """Einrichten `self.axspin` und `self.axpha`.
         Verbindet 'button_press_event' mit self._klick.
         """
         self.axspin.set_title("$Spinkonfiguration$", y=1.02, fontsize=20)
-        self.axpha.set_title("$Mittlere\ Magnetisierung$", y=1.02, fontsize=20)
+        self.axpha.set_title(r"$Mittlere\ Magnetisierung$", y=1.02, fontsize=20)
         self.axspin.set_xticks([])
         self.axspin.set_yticks([])
         self.axpha.set_xlabel(r"$\tau$")
-        self.axpha.set_ylabel("m", rotation='horizontal', y=0.85)
+        self.axpha.set_ylabel("m", rotation="horizontal", y=0.85)
         self.axpha.axis([0, self.maxtau, -1.1, 1.1])
-        self.pointer, = self.axpha.plot([], [], "ko")
-        color_mag = "red"                       # Einheitliche th. Zeichenfarbe
+        (self.pointer,) = self.axpha.plot([], [], "ko")
+        color_mag = "red"  # Einheitliche th. Zeichenfarbe
         # Stuetzen theoretische Kurven; kritische Temperatur ca 2.269
         th_kurven, tau = self.theorie_m(0, self.maxtau)
         for tk in th_kurven:
             self.axpha.plot(tau, tk, color=color_mag)
-        self.axpha.figure.canvas.mpl_connect('button_press_event', self._klick)
+        self.axpha.figure.canvas.mpl_connect("button_press_event", self._klick)
 
     def theorie_m(self, t_min, t_max, dtau=100):
-        """Formel m : +,- (1 - 1/np.sinh(2/tau)**4)**0.125
-        """
-# TEXT
+        """Formel m : +,- (1 - 1/np.sinh(2/tau)**4)**0.125"""
+        # TEXT
         if t_max < 0:
-            return [], []                 # Negative Temperatur
-        assert t_min < t_max                        # Ordnung korrekt
-        grenztau = 2. / np.arcsinh(1)               # Grenztemperatur
-        t_min = max(0., t_min)                      # t_min>=0
-        taux_ar = []                                # Sammelt Stuetzpunkte
+            return [], []  # Negative Temperatur
+        assert t_min < t_max  # Ordnung korrekt
+        grenztau = 2.0 / np.arcsinh(1)  # Grenztemperatur
+        t_min = max(0.0, t_min)  # t_min>=0
+        taux_ar = []  # Sammelt Stuetzpunkte
         # x-Bereich zusammensetzen
-        if t_min < 2.2:                             # flacher Bereich
+        if t_min < 2.2:  # flacher Bereich
             taux_ar += [np.linspace(t_min, min(t_max, 2.2), dtau)]
-        if t_min < grenztau and t_max > 2.2:         # steiler Bereich
-            taux_ar += [np.linspace(max(2.2, t_min), min(t_max, grenztau), dtau,
-                                    endpoint=False)]
-        if t_max >= grenztau:                        # Waagerecht
+        if t_min < grenztau and t_max > 2.2:  # steiler Bereich
+            taux_ar += [
+                np.linspace(max(2.2, t_min), min(t_max, grenztau), dtau, endpoint=False)
+            ]
+        if t_max >= grenztau:  # Waagerecht
             taux_ar += [grenztau, t_max]
         tau = np.hstack(taux_ar)
         mo = np.ones_like(tau, dtype=float)
         # mk: tau nach differenzierbarer Form
-        tau_slice = (tau > 0) * (tau < grenztau)    # Bool*Bool -> Logisch und
-        mo[tau_slice] = (1 - 1/np.sinh(2/tau[tau_slice])**4)**0.125
-        mo[tau >= grenztau] = 0.
-        mu = - mo                                    # Erstellen unterer Linie
+        tau_slice = (tau > 0) * (tau < grenztau)  # Bool*Bool -> Logisch und
+        mo[tau_slice] = (1 - 1 / np.sinh(2 / tau[tau_slice]) ** 4) ** 0.125
+        mo[tau >= grenztau] = 0.0
+        mu = -mo  # Erstellen unterer Linie
         return (mo, mu), tau
 
     def _klick(self, event):
         """Verwaltet Mausklick.
         Bei Linksklick in einen der Achsenbereiche:
         """
-# TEXT
+        # TEXT
         # Test ob Funktionen des Plotfensters deaktiviert sind:
         mode = plt.get_current_fig_manager().toolbar.mode
-        if not (mode == '' and event.button == 1):
+        if not (mode == "" and event.button == 1):
             return
-        if event.inaxes == self.axspin:             # Iterationen
+        if event.inaxes == self.axspin:  # Iterationen
             self.plot_aktiv = True
             for i in range(self.mc_steps):
                 self.mc_schritt()
                 plt.setp(self.imh, data=self.Spins.s_arr)
-                self.pointer.set_ydata(self.Spins.m)
+                self.pointer.set_ydata([self.Spins.m])
                 plt.pause(0.10)
             self.plot_aktiv = False
         elif event.inaxes == self.axpha:
             if self.plot_aktiv:
-                return              # Noch in Zeichnung&Rechnung
+                return  # Noch in Zeichnung&Rechnung
             # Neue Startposition
             t, m = event.xdata, event.ydata
-            tau_s = max(t, 0.)                      # tau Nicht negativ
-            m_s = min(1., max(m, -1.))              # m in [-1, +1]
-            self.Spins.neue_konfig(tau_s, m_s)      # Aufruf mit Startwert
+            tau_s = max(t, 0.0)  # tau Nicht negativ
+            m_s = min(1.0, max(m, -1.0))  # m in [-1, +1]
+            self.Spins.neue_konfig(tau_s, m_s)  # Aufruf mit Startwert
             plt.setp(self.imh, data=self.Spins.s_arr)
-            self.pointer.set_data(self.Spins.tau, self.Spins.m)
+            self.pointer.set_data([self.Spins.tau], [self.Spins.m])
             self.axpha.figure.canvas.draw()
 
     def mc_schritt(self):
@@ -259,12 +262,12 @@ class IsingModell(object):
         Metropolis-Algorithmus umklappen,
         wenn Wahrscheinlichkeit von `self.Spins.wk_spinflip()` erfuellt.
         """
-        for k in range(self.n*self.n):
+        for k in range(self.n * self.n):
             # Zwei Zufallszahlen Pos.
             x, y = np.random.randint(self.n, size=2)
-            wk = self.Spins.wk_spinflip(x, y)       # Wahrscheinlichkeit flip
+            wk = self.Spins.wk_spinflip(x, y)  # Wahrscheinlichkeit flip
             if wk == 1:
-                self.Spins.flip(x, y)         # 1: Direkt Spin drehen.
+                self.Spins.flip(x, y)  # 1: Direkt Spin drehen.
             elif np.random.rand() <= wk:
                 self.Spins.flip(x, y)
         # Neue Spin-Konfiguration erstellt.
@@ -279,17 +282,13 @@ def main():
     """Mainfunktion fuer Ising-Modell.
     Eingabe der Parameter und Starten gewuenschter Realisierungen.
     """
-    # Unterdruecke mplDeprecation waehrend Durchlauf. Dies hat lediglich
-    # Einfluss auf die Konsolenausgabe des Programms.
-    filterwarnings("ignore", category=cbook.mplDeprecation)
-
     # Anfangstext Konsole
     print(__doc__)
 
     # Numerik
     n = 50
     m0 = 0.6
-    t0 = 1.
+    t0 = 1.0
     mc_steps = 1
 
     # Darstellung
@@ -304,7 +303,7 @@ def main():
 
 # -------------Main Programm----------------
 if __name__ == "__main__":
-    main()                                          # Rufe Mainroutine
+    main()  # Rufe Mainroutine
 
 
 """Kommentar:
